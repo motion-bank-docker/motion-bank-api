@@ -11,6 +11,9 @@ const
   primus = new Primus(server, { transformer: 'uws' }),
   app = polka({ server })
 
+winston.level = process.env.NODE_ENV === 'production' ? 'error' : 'info'
+winston.level = process.env.LOG_LEVEL || winston.level
+
 primus.on('connection', spark => {
   winston.log('debug', `Spark ${spark.id} connected with address ${spark.address}`)
 })
