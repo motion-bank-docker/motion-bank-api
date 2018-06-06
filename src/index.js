@@ -4,7 +4,11 @@ const
   polka = require('polka'),
   Primus = require('primus'),
   morgan = require('morgan'),
-  { json } = require('body-parser')
+  cors = require('cors')({ origin: true }),
+  jwt = require('express-jwt'),
+  jwks = require('jwks-rsa'),
+  { json } = require('body-parser'),
+  { ObjectUtil } = require('mbjs-utils')
 
 /**
  * HTTP server
@@ -42,14 +46,23 @@ const
   Service = require('./service'),
   app = polka({ server })
 
-app.use(json())
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev'))
+const jwtCheck = jwt(ObjectUtil.merge({
+  secret: jwks.expressJwtSecret(config.get('auth.jwks'))
+}, config.get('auth.jwt')))
+
+app.use(cors, jwtCheck, json(), morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev'))
 
 /**
  * Configure resources
  */
 const annotations = new Service('annotations', app, models.Annotation, winston)
 annotations.on('message', message => primus.write(message))
+
+const maps = new Service('maps', app, models.Map, winston)
+maps.on('message', message => primus.write(message))
+
+const documents = new Service('documents', app, models.Document, winston)
+documents.on('message', message => primus.write(message))
 
 /**
  * Start server

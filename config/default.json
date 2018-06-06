@@ -9,5 +9,19 @@
       "url": "mongodb://localhost:27017/motionbank-api",
       "dbName": "motionbank-api"
     }
+  },
+  "auth": {
+    "jwks": {
+      "cache": true,
+      "rateLimit": true,
+      "jwksRequestsPerMinute": 5,
+      "jwksUri": "https://motionbank.eu.auth0.com/.well-known/jwks.json"
+    },
+    "jwt": {
+      "audience": "https://motionbank-api.herokuapp.com",
+      "issuer": "https://motionbank.eu.auth0.com/",
+      "algorithms": ["RS256"],
+      "credentialsRequired": false
+    }
   }
 }

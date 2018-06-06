@@ -16,12 +16,12 @@ class Service extends TinyEmitter {
 
     const _this = this
 
-    app.get(`/${this._name}.json`, async (req, res) => {
+    app.get(`/${this._name}`, async (req, res) => {
       const results = await this.client.find(req.params.query || {}, req.params)
       _this._response(req, res, results)
     })
 
-    app.get(`/${this._name}/:id.json`, async (req, res) => {
+    app.get(`/${this._name}/:id`, async (req, res) => {
       const result = await this.client.get(req.params.id, req.params)
       if (result) {
         const instance = new this.ModelConstructor(result, `${req.params.id}`)
@@ -30,7 +30,7 @@ class Service extends TinyEmitter {
       send(res, 404)
     })
 
-    app.post(`/${this._name}.json`, async (req, res) => {
+    app.post(`/${this._name}`, async (req, res) => {
       const
         ctx = this,
         data = req.body
@@ -43,38 +43,42 @@ class Service extends TinyEmitter {
       // TODO: allow for full array inserts instead just single requests
       const instance = new this.ModelConstructor(data),
         result = await this.client.create(instance, req.params)
-      instance.update(result)
+      instance.populate(result)
       _this._response(req, res, instance)
     })
 
-    app.put(`/${this._name}/:id.json`, async (req, res) => {
+    app.put(`/${this._name}/:id`, async (req, res) => {
       const data = req.body
-      let result = await this.get(req.params.id)
+      let result = await this.client.get(req.params.id)
       if (result) {
         // TODO: transactions anyone?!
+        data.uuid = req.params.id
         let instance = new this.ModelConstructor(data, req.params.id)
         result = await this.client.update(req.params.id, instance, req.params)
-        instance = new this.ModelConstructor(result, req.params.id)
         return _this._response(req, res, instance)
       }
       send(res, 404)
     })
 
-    app.patch(`/${this._name}/:id.json`, async (req, res) => {
+    app.patch(`/${this._name}/:id`, async (req, res) => {
       const data = req.body
-      let instance = await this.get(req.params.id)
-      if (instance) {
-        instance.update(data)
+      let existing = await this.client.get(req.params.id)
+      if (existing) {
+        let instance = new this.ModelConstructor(existing, req.params.id)
+        instance.populate(ObjectUtil.merge(instance.toObject(), data))
         await this.client.update(req.params.id, instance, req.params)
         return _this._response(req, res, instance)
       }
       send(res, 404)
     })
 
-    app.delete(`/${this._name}/:id.json`, async (req, res) => {
-      const result = await this.client.remove(req.params.id, req.params)
-      if (result) {
-        return _this._response(req, res, result)
+    app.delete(`/${this._name}/:id`, async (req, res) => {
+      let existing = await this.client.get(req.params.id)
+      if (existing) {
+        const result = await this.client.remove(req.params.id, req.params)
+        if (result) {
+          return _this._response(req, res, existing)
+        }
       }
       send(res, 404)
     })
