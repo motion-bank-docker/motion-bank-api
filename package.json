@@ -1,9 +1,10 @@
 {
   "name": "api-minimal",
-  "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "A minimalist version of the Motion Bank API",
+  "main": "src/index.js",
   "scripts": {
+    "start": "node src",
     "lint": "eslint src/. --config .eslintrc.js",
     "metapak": "metapak",
     "test": "echo \"Error: no test specified\" && exit 1"
