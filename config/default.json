@@ -18,7 +18,7 @@
       "jwksUri": "https://motionbank.eu.auth0.com/.well-known/jwks.json"
     },
     "jwt": {
-      "audience": "https://motionbank-api.herokuapp.com",
+      "audience": "https://api.motionbank.org",
       "issuer": "https://motionbank.eu.auth0.com/",
       "algorithms": ["RS256"],
       "credentialsRequired": false
