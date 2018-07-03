@@ -10,6 +10,14 @@
       "dbName": "motionbank-api"
     }
   },
+  "acl": {
+    "mongodb": {
+      "name": "acl",
+      "prefix": "acl_",
+      "url": "mongodb://localhost:27017/motionbank-api",
+      "dbName": "motionbank-api"
+    }
+  },
   "auth": {
     "jwks": {
       "cache": true,

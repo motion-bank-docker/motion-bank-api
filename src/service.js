@@ -6,10 +6,11 @@ const
   { MongoDB } = require('mbjs-persistence')
 
 class Service extends TinyEmitter {
-  constructor (name, app, model, logger) {
+  constructor (name, app, model, logger, acl) {
     super()
 
     this._name = name
+    this._acl = acl
     this._Model = model
     // TODO: make db adapter configurable (nedb, etc.)
     this._client = new MongoDB(ObjectUtil.merge({ name, logger }, config.get('resources.mongodb')), 'uuid')
@@ -91,6 +92,10 @@ class Service extends TinyEmitter {
 
   get client () {
     return this._client
+  }
+
+  get acl () {
+    return this._acl
   }
 
   get ModelConstructor () {
