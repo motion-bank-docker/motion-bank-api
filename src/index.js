@@ -5,6 +5,7 @@ const
   Primus = require('primus'),
   morgan = require('morgan'),
   cors = require('cors')({ origin: true }),
+  send = require('@polka/send-type'),
   jwt = require('express-jwt'),
   jwks = require('jwks-rsa'),
   { json } = require('body-parser'),
@@ -45,7 +46,12 @@ const setup = async function () {
   const
     models = require('mbjs-data-models'),
     Service = require('./service'),
-    app = polka({ server })
+    app = polka({
+      server,
+      onError (err, req, res, next) {
+        send(res, err.status || 500, { code: err.code })
+      }
+    })
 
   const jwtCheck = jwt(ObjectUtil.merge({
     secret: jwks.expressJwtSecret(config.get('auth.jwks'))
