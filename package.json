@@ -35,7 +35,7 @@
     "cors": "^2.8.4",
     "express-jwt": "^5.3.1",
     "jwks-rsa": "^1.2.1",
-    "mbjs-data-models": "0.0.4",
+    "mbjs-data-models": "0.0.5",
     "mbjs-persistence": "^0.2.0",
     "mbjs-utils": "0.0.5",
     "mongodb": "^3.1.0",
