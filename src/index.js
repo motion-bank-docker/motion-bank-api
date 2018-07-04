@@ -75,7 +75,11 @@ const setup = async function () {
   /**
    * Start server
    */
-  app.listen(port, host).then(() => winston.log('info', `API started on ${host}:${port}`))
+  return app.listen(port, host).then(() => winston.log('info', `API started on ${host}:${port}`))
 }
 
-setup()
+setup().catch(err => {
+  process.stderr.write(err.message + '\n')
+  process.stderr.write(err.stack + '\n')
+  process.exit(err.code)
+})
