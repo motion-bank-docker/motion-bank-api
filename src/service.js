@@ -18,7 +18,7 @@ class Service extends TinyEmitter {
     const _this = this
 
     app.get(`/${this._name}`, async (req, res) => {
-      const results = await this.client.find(req.params.query || {}, req.params)
+      const results = await this.client.find(JSON.parse(req.params.query || '{}'), req.params)
       _this._response(req, res, { items: results })
     })
 
