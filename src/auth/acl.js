@@ -9,7 +9,7 @@ const setupACL = async function (app) {
   cfg.logger = console
   const client = new MongoDB(cfg, 'uuid')
   await client.connect()
-  const acl = new Acl(new Backend(client.db, cfg.prefix))
+  const acl = new Acl(new Backend(client.db.s.db, cfg.prefix))
   return acl
 }
 

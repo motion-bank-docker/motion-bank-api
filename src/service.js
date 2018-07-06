@@ -45,6 +45,7 @@ class Service extends TinyEmitter {
       const instance = new this.ModelConstructor(data),
         result = await this.client.create(instance, req.params)
       instance.populate(result)
+      acl.allow(req.user.uuid, `/${this._name}/${instance.uuid}`, '*')
       _this._response(req, res, instance)
     })
 
