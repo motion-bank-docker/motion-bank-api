@@ -28,7 +28,7 @@ class Service extends TinyEmitter {
         const instance = new this.ModelConstructor(result, `${req.params.id}`)
         return _this._response(req, res, instance)
       }
-      send(res, 404)
+      else send(res, 404)
     })
 
     app.post(`/${this._name}`, async (req, res) => {
@@ -58,7 +58,7 @@ class Service extends TinyEmitter {
         result = await this.client.update(req.params.id, instance, req.params)
         return _this._response(req, res, instance)
       }
-      send(res, 404)
+      else send(res, 404)
     })
 
     app.patch(`/${this._name}/:id`, async (req, res) => {
@@ -70,7 +70,7 @@ class Service extends TinyEmitter {
         await this.client.update(req.params.id, instance, req.params)
         return _this._response(req, res, instance)
       }
-      send(res, 404)
+      else send(res, 404)
     })
 
     app.delete(`/${this._name}/:id`, async (req, res) => {
@@ -81,7 +81,7 @@ class Service extends TinyEmitter {
           return _this._response(req, res, existing)
         }
       }
-      send(res, 404)
+      else send(res, 404)
     })
   }
 
