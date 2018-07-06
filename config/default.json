@@ -18,6 +18,13 @@
       "dbName": "motionbank-api"
     }
   },
+  "profiles": {
+    "mongodb": {
+      "prefix": "sys_",
+      "url": "mongodb://localhost:27017/motionbank-api",
+      "dbName": "motionbank-api"
+    }
+  },
   "auth": {
     "jwks": {
       "cache": true,

@@ -30,6 +30,7 @@
   "dependencies": {
     "@polka/send-type": "^0.4.0",
     "acl": "^0.4.11",
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "config": "^1.30.0",
     "cors": "^2.8.4",

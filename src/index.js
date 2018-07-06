@@ -44,8 +44,6 @@ const setup = async function () {
    * Setup API server (Polka)
    */
   const
-    models = require('mbjs-data-models'),
-    Service = require('./service'),
     app = polka({
       server,
       onError (err, req, res, next) {
@@ -63,12 +61,33 @@ const setup = async function () {
    * Set up ACL
    */
   const
-    setupACL = require('./acl'),
+    setupACL = require('./auth/acl'),
     acl = await setupACL(app)
+
+  /**
+   * Middleware
+   */
+  const addUserUUID = require('./middleware/user')
+  addUserUUID(app)
+
+  const addAuthor = require('./middleware/author')
+  addAuthor(app)
+
+  /**
+   * Configure Profiles
+   */
+  const
+    Profiles = require('./profiles'),
+    profiles = new Profiles(app)
+  profiles.on('message', message => console.log(message))
 
   /**
    * Configure resources
    */
+  const
+    models = require('mbjs-data-models'),
+    Service = require('./service')
+
   const annotations = new Service('annotations', app, models.Annotation, winston, acl)
   annotations.on('message', message => primus.write(message))
 
