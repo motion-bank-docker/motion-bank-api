@@ -58,6 +58,12 @@ const setup = async function () {
   app.use(cors, jwtCheck, json(), morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev'))
 
   /**
+   * Add proxy
+   */
+  const proxy = require('./middleware/proxy')
+  proxy(app)
+
+  /**
    * Set up ACL
    */
   const
