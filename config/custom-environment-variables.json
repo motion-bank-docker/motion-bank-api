@@ -1,26 +1,18 @@
 {
-  "http": {
-    "host": "0.0.0.0",
-    "port": 3030
-  },
   "resources": {
     "mongodb": {
-      "prefix": "res_",
       "url": "MONGODB_RESOURCES_URL",
       "dbName": "MONGODB_RESOURCES_DBNAME"
     }
   },
   "acl": {
     "mongodb": {
-      "name": "acl",
-      "prefix": "acl_",
       "url": "MONGODB_ACL_URL",
       "dbName": "MONGODB_ACL_DBNAME"
     }
   },
   "profiles": {
     "mongodb": {
-      "prefix": "sys_",
       "url": "MONGODB_PROFILES_URL",
       "dbName": "MONGODB_PROFILES_DBNAME"
     }
