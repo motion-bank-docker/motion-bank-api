@@ -1,4 +1,4 @@
-FROM node
+FROM node:10
 MAINTAINER Motion Bank
 
 WORKDIR /app
