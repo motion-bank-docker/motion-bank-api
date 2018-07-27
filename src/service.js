@@ -18,15 +18,44 @@ class Service extends TinyEmitter {
     const _this = this
 
     app.get(`/${this._name}`, async (req, res) => {
-      const results = await this.client.find(JSON.parse(req.query.query || '{}'), req.params)
-      _this._response(req, res, { items: results })
+      let results = await this.client.find(JSON.parse(req.query.query || '{}'), req.params)
+      const user = req.user ? req.user.uuid : 'anon'
+      const items = []
+      for (let entry of results) {
+        let allowed = false
+        if (entry.author && entry.author.id === user) allowed = true
+        else {
+          try {
+            allowed = await acl.isAllowed(user, entry.uuid, 'get')
+          }
+          catch (err) {
+            logger.error(`ACL error: ${err.message}`)
+          }
+        }
+        if (allowed) items.push(entry)
+      }
+      _this._response(req, res, { items })
     })
 
     app.get(`/${this._name}/:id`, async (req, res) => {
       const result = await this.client.get(req.params.id, req.params)
+      const user = req.user ? req.user.uuid : 'anon'
       if (result) {
-        const instance = new this.ModelConstructor(result, `${req.params.id}`)
-        return _this._response(req, res, instance)
+        let allowed = false
+        if (result.author && result.author.id === user) allowed = true
+        else {
+          try {
+            allowed = await acl.isAllowed(user, result.uuid, 'get')
+          }
+          catch (err) {
+            logger.error(`ACL error: ${err.message}`)
+          }
+        }
+        if (allowed) {
+          const instance = new this.ModelConstructor(result, `${req.params.id}`)
+          return _this._response(req, res, instance)
+        }
+        send(res, 403)
       }
       else send(res, 404)
     })
@@ -45,7 +74,6 @@ class Service extends TinyEmitter {
       const instance = new this.ModelConstructor(data),
         result = await this.client.create(instance, req.params)
       instance.populate(result)
-      acl.allow(req.user.uuid, `/${this._name}/${instance.uuid}`, '*')
       _this._response(req, res, instance)
     })
 
