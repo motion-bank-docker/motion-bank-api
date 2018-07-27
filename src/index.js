@@ -1,5 +1,6 @@
 const
   config = require('config'),
+  path = require('path'),
   http = require('http'),
   polka = require('polka'),
   Primus = require('primus'),
@@ -7,6 +8,7 @@ const
   cors = require('cors')({ origin: true }),
   send = require('@polka/send-type'),
   jwt = require('express-jwt'),
+  favicon = require('serve-favicon'),
   jwks = require('jwks-rsa'),
   { json } = require('body-parser'),
   { ObjectUtil } = require('mbjs-utils')
@@ -51,6 +53,8 @@ const setup = async function () {
       }
     })
 
+  app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
+
   const jwtCheck = jwt(ObjectUtil.merge({
     secret: jwks.expressJwtSecret(config.get('auth.jwks'))
   }, config.get('auth.jwt')))
@@ -85,7 +89,7 @@ const setup = async function () {
   const
     Profiles = require('./profiles'),
     profiles = new Profiles(app)
-  profiles.on('message', message => console.log(message))
+  profiles.on('message', message => winston.debug(message))
 
   /**
    * Configure resources
@@ -106,7 +110,7 @@ const setup = async function () {
   /**
    * Start server
    */
-  return app.listen(port, host).then(() => winston.log('info', `API started on ${host}:${port}`))
+  return app.listen(port, host).then(() => winston.info(`API started on ${host}:${port}`))
 }
 
 setup().catch(err => {
