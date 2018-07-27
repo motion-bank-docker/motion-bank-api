@@ -84,7 +84,7 @@ class Service extends TinyEmitter {
         // TODO: transactions anyone?!
         data.uuid = req.params.id
         let instance = new this.ModelConstructor(data, req.params.id)
-        result = await this.client.update(req.params.id, instance, req.params)
+        await this.client.update(req.params.id, instance, req.params)
         return _this._response(req, res, instance)
       }
       else send(res, 404)
