@@ -3,7 +3,7 @@
 
 # api-minimal
 
-> Unidentified :ghost: module
+> A minimalist version of the Motion Bank API
 
 
 
