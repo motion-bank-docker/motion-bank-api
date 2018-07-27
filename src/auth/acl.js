@@ -2,22 +2,30 @@ const
   Acl = require('acl'),
   config = require('config'),
   Backend = Acl.mongodbBackend,
-  { MongoDB } = require('mbjs-persistence'),
+  MongoClient = require('mongodb').MongoClient,
   send = require('@polka/send-type')
 
 const setupACL = async function (app) {
   const cfg = config.get('acl.mongodb')
   cfg.logger = console
-  const client = new MongoDB(cfg, 'uuid')
-  await client.connect()
-  const acl = new Acl(new Backend(client.db.s.db, cfg.prefix))
+
+  const db = await new Promise((resolve, reject) => {
+    MongoClient.connect(cfg.url, function (err, client) {
+      if (err) return reject(err)
+      cfg.logger.info(`ACL connected at ${cfg.url}/${cfg.dbName}`)
+      const db = client.db(cfg.dbName)
+      resolve(db)
+    })
+  })
+
+  const acl = new Acl(new Backend(db))
 
   /**
    * Manage permissions
    */
 
   app.get('/acl/:role/:resource', (req, res, next) => {
-    acl.allowedPermissions(req.params.role, req.resource, (err, result) => {
+    acl.allowedPermissions(req.params.role, req.params.resource, (err, result) => {
       if (err) next(err)
       else if (result) send(res, 200, result)
       else send(res, 404)

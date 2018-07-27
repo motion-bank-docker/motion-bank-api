@@ -12,17 +12,15 @@
   },
   "acl": {
     "mongodb": {
-      "name": "acl",
-      "prefix": "acl_",
-      "url": "mongodb://localhost:27017/motionbank-api-dev",
-      "dbName": "motionbank-api-dev"
+      "url": "mongodb://localhost:27017",
+      "dbName": "motionbank-api-acl-dev"
     }
   },
   "profiles": {
     "mongodb": {
       "prefix": "sys_",
-      "url": "mongodb://localhost:27017/motionbank-api-dev",
-      "dbName": "motionbank-api-dev"
+      "url": "mongodb://localhost:27017/motionbank-api-sys-dev",
+      "dbName": "motionbank-api-sys-dev"
     }
   },
   "auth": {
