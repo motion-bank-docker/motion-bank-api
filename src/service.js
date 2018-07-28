@@ -43,7 +43,7 @@ class Service extends TinyEmitter {
       }
       if (allowed) items.push(entry)
     }
-    this._response(req, res, { items })
+    return this._response(req, res, { items })
   }
 
   async getHandler (req, res) {
@@ -64,9 +64,9 @@ class Service extends TinyEmitter {
         const instance = new this.ModelConstructor(result, `${req.params.id}`)
         return this._response(req, res, instance)
       }
-      this._errorResponse(res, 403)
+      return this._errorResponse(res, 403)
     }
-    else this._errorResponse(res, 404)
+    else return this._errorResponse(res, 404)
   }
 
   async postHandler (req, res) {
@@ -83,7 +83,7 @@ class Service extends TinyEmitter {
     const instance = new this.ModelConstructor(data),
       result = await this.client.create(instance, req.params)
     instance.populate(result)
-    this._response(req, res, instance)
+    return this._response(req, res, instance)
   }
 
   async putHandler (req, res) {
@@ -96,7 +96,7 @@ class Service extends TinyEmitter {
       await this.client.update(req.params.id, instance, req.params)
       return this._response(req, res, instance)
     }
-    else this._errorResponse(res, 404)
+    else return this._errorResponse(res, 404)
   }
 
   async patchHandler (req, res) {
@@ -108,7 +108,7 @@ class Service extends TinyEmitter {
       await this.client.update(req.params.id, instance, req.params)
       return this._response(req, res, instance)
     }
-    else this._errorResponse(res, 404)
+    else return this._errorResponse(res, 404)
   }
 
   async deleteHandler (req, res) {
@@ -119,17 +119,19 @@ class Service extends TinyEmitter {
         return this._response(req, res, existing)
       }
     }
-    else this._errorResponse(res, 404)
+    else return this._errorResponse(res, 404)
   }
 
   _response (req, res, data = {}) {
     this.emit('message', { method: req.method, id: data.id })
     if (typeof res === 'function') res({ data })
+    else if (typeof res === 'undefined') return Promise.resolve({ data })
     else send(res, 200, data)
   }
 
   _errorResponse (res, code, message = undefined) {
     if (typeof res === 'function') res({ error: true, code })
+    else if (typeof res === 'undefined') return Promise.resolve({ error: true, code })
     else send(res, code, message)
   }
 

@@ -5,7 +5,7 @@ const
 const setup = async function (app) {
   app.use(async (req, res, next) => {
     if (req.method.toLowerCase() === 'post') {
-      if (req.body) {
+      if (req.body && req.headers.authorization) {
         const profile = await axios.get(`${config.auth.jwt.issuer}userinfo`, {
           headers: {
             Authorization: req.headers.authorization

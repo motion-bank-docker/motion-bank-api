@@ -5,10 +5,12 @@ const
   fs = require('mz/fs'),
   rimraf = require('rimraf'),
   os = require('os'),
+  multer = require('multer'),
   send = require('@polka/send-type'),
   { Assert } = require('mbjs-utils')
 
 module.exports.setupArchives = (app, mapService, annotationService) => {
+  const upload = multer({ dest: os.tmpdir() })
   app.post('/archives/maps', async (req, res) => {
     let data = {}
     let request = {
@@ -41,6 +43,55 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
     res.setHeader('Content-Type', 'application/zip')
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
     file.pipe(res)
+  })
+  app.post('/archives/maps/upload', async function (req, res) {
+    upload.single('file')(req, res, async () => {
+      const results = await exports.readArchive(req.file.path)
+      console.log(results)
+      let hasDuplicates = false
+      if (results.maps) {
+        for (let map of results.maps) {
+          const getRequest = {
+            params: { id: map.uuid },
+            user: req.user
+          }
+          const item = await mapService.getHandler(getRequest)
+          if (!item.error) hasDuplicates = true
+        }
+      }
+      if (results.annotations) {
+        for (let annotation of results.annotations) {
+          const getRequest = {
+            params: { id: annotation.uuid },
+            user: req.user
+          }
+          const item = await annotationService.getHandler(getRequest)
+          if (!item.error) hasDuplicates = true
+        }
+      }
+      if (hasDuplicates) send(res, 400, { message: 'errors.has_duplicates' })
+      else {
+        if (results.maps) {
+          for (let map of results.maps) {
+            const postRequest = {
+              body: map.uuid,
+              user: req.user
+            }
+            await mapService.postHandler(postRequest)
+          }
+        }
+        if (results.annotations) {
+          for (let annotation of results.annotations) {
+            const postRequest = {
+              body: annotation,
+              user: req.user
+            }
+            await annotationService.postHandler(postRequest)
+          }
+        }
+        send(res, 200)
+      }
+    })
   })
 }
 
@@ -90,25 +141,37 @@ module.exports.createArchive = async (data) => {
 }
 
 module.exports.readArchive = archivePath => {
-  yauzl.open(archivePath, {lazyEntries: true}, function (err, zipfile) {
-    if (err) throw err
-    zipfile.readEntry()
-    zipfile.on('entry', function (entry) {
-      if (/\/$/.test(entry.fileName)) {
-        // Directory file names end with '/'.
-        // Note that entires for directories themselves are optional.
-        // An entry's fileName implicitly requires its parent directories to exist.
-        zipfile.readEntry()
-      }
-      else {
-        // file entry
-        zipfile.openReadStream(entry, function (err, readStream) {
-          if (err) throw err
-          readStream.on('end', function () {
-            zipfile.readEntry()
-          })
+  const results = {}
+  const getFile = (entry, zipfile) => {
+    return new Promise((rs, rj) => {
+      let data = ''
+      zipfile.openReadStream(entry, function (err, readStream) {
+        if (err) return rj(err)
+        readStream.on('data', chunk => {
+          data += chunk.toString()
         })
-      }
+        readStream.on('end', () => rs(data))
+        readStream.on('error', err => rj(err))
+      })
+    })
+  }
+  return new Promise((resolve, reject) => {
+    yauzl.open(archivePath, {lazyEntries: true}, async (err, zipfile) => {
+      if (err) return reject(err)
+      zipfile.readEntry()
+      zipfile.on('end', () => resolve(results))
+      zipfile.on('error', err => reject(err))
+      zipfile.on('entry', async entry => {
+        if (/\/$/.test(entry.fileName)) zipfile.readEntry()
+        else {
+          const type = path.dirname(entry.fileName)
+          const data = await getFile(entry, zipfile)
+          const obj = JSON.parse(data)
+          if (!results[type]) results[type] = []
+          results[type].push(obj)
+          zipfile.readEntry()
+        }
+      })
     })
   })
 }
