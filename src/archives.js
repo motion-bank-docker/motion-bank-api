@@ -11,23 +11,36 @@ const
 module.exports.setupArchives = (app, mapService, annotationService) => {
   app.post('/archives/maps', async (req, res) => {
     let data = {}
-    const request = {
+    let request = {
       params: {
-        id: req.body.uuid
-      }
+        id: req.body.id
+      },
+      user: req.user
     }
     await mapService.getHandler(request, async result => {
       if (result.error) return send(res, result.code)
       data.map = result.data
-      await annotationService.find({ 'target.id': data.map.uuid }, async result => {
+      request = {
+        query: {
+          query: JSON.stringify({'target.id': data.map.uuid})
+        },
+        user: req.user
+      }
+      await annotationService.findHandler(request, async result => {
         if (result.error) return send(res, result.code)
-        data.annotations = result.annotations
-        const filePath = await exports.createArchive(data)
-        res.setHeader('Content-Type', 'application/zip')
-        const file = fs.createReadStream(filePath)
-        file.pipe(res)
+        data.annotations = result.data.items
+        const fileId = await exports.createArchive(data)
+        send(res, 200, fileId)
       })
     })
+  })
+  app.get('/archives/maps/:id', async (req, res) => {
+    const filename = `map_archive_${req.params.id}.zip`
+    const filePath = path.join(os.tmpdir(), filename)
+    const file = fs.createReadStream(filePath)
+    res.setHeader('Content-Type', 'application/zip')
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    file.pipe(res)
   })
 }
 
@@ -39,17 +52,19 @@ module.exports.createArchive = async (data) => {
     dir = path.join(os.tmpdir(), `map_archive_${data.map.uuid}`),
     archive = new yazl.ZipFile()
 
-  try {
-    await rimraf(dir)
-  }
-  catch (e) { /* ignored */ }
+  await new Promise((resolve, reject) => {
+    rimraf(dir, err => {
+      if (err) return reject(err)
+      resolve()
+    })
+  })
 
   await fs.mkdir(dir)
-  await fs.mkdir(path.join(dir, 'map'))
+  await fs.mkdir(path.join(dir, 'maps'))
   await fs.mkdir(path.join(dir, 'annotations'))
 
-  const mapfile = path.join('map', `${data.map.uuid}.json`)
-  await fs.writeFile(mapfile, JSON.stringify(data.map))
+  const mapfile = path.join('maps', `${data.map.uuid}.json`)
+  await fs.writeFile(path.join(dir, mapfile), JSON.stringify(data.map))
   archive.addFile(path.join(dir, mapfile), mapfile)
 
   for (let a of data.annotations) {
@@ -57,6 +72,8 @@ module.exports.createArchive = async (data) => {
     await fs.writeFile(path.join(dir, annofile), JSON.stringify(a))
     archive.addFile(path.join(dir, annofile), annofile)
   }
+
+  archive.end()
 
   const archivePath = `${dir}.zip`
   await new Promise((resolve, reject) => {
@@ -69,7 +86,7 @@ module.exports.createArchive = async (data) => {
       })
   })
 
-  return archivePath
+  return path.basename(data.map.uuid)
 }
 
 module.exports.readArchive = archivePath => {

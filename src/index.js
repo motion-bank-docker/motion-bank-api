@@ -108,6 +108,13 @@ const setup = async function () {
   documents.on('message', message => primus.write(message))
 
   /**
+   * Configure archives
+   */
+
+  const archives = require('./archives')
+  archives.setupArchives(app, maps, annotations)
+
+  /**
    * Start server
    */
   return app.listen(port, host).then(() => winston.info(`API started on ${host}:${port}`))

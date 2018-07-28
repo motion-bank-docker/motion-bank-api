@@ -124,7 +124,7 @@ class Service extends TinyEmitter {
 
   _response (req, res, data = {}) {
     this.emit('message', { method: req.method, id: data.id })
-    if (typeof res === 'function') res(data)
+    if (typeof res === 'function') res({ data })
     else send(res, 200, data)
   }
 
