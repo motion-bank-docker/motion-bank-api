@@ -47,9 +47,9 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
   app.post('/archives/maps/upload', async function (req, res) {
     upload.single('file')(req, res, async () => {
       const results = await exports.readArchive(req.file.path)
-      console.log(results)
+      const copy = req.body.title || false
       let hasDuplicates = false
-      if (results.maps) {
+      if (results.maps && !copy) {
         for (let map of results.maps) {
           const getRequest = {
             params: { id: map.uuid },
@@ -59,7 +59,7 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
           if (!item.error) hasDuplicates = true
         }
       }
-      if (results.annotations) {
+      if (results.annotations && !copy) {
         for (let annotation of results.annotations) {
           const getRequest = {
             params: { id: annotation.uuid },
@@ -71,17 +71,34 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
       }
       if (hasDuplicates) send(res, 400, { message: 'errors.has_duplicates' })
       else {
+        const mappings = {}
         if (results.maps) {
           for (let map of results.maps) {
+            let oldId = map.uuid
+            for (let k of Object.keys(map)) {
+              if (k[0] === '_') map[k] = undefined
+            }
+            if (copy) {
+              map.title = req.body.title
+              map.uuid = undefined
+            }
             const postRequest = {
-              body: map.uuid,
+              body: map,
               user: req.user
             }
-            await mapService.postHandler(postRequest)
+            const result = await mapService.postHandler(postRequest)
+            if (copy) mappings[oldId] = result.data.uuid
           }
         }
         if (results.annotations) {
           for (let annotation of results.annotations) {
+            for (let k of Object.keys(annotation)) {
+              if (k[0] === '_') annotation[k] = undefined
+            }
+            if (copy) {
+              annotation.target.id = mappings[annotation.target.id]
+              annotation.uuid = undefined
+            }
             const postRequest = {
               body: annotation,
               user: req.user
