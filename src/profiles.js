@@ -15,7 +15,16 @@ class Profiles extends TinyEmitter {
     const _this = this
 
     app.get('/profiles/:id', async (req, res) => {
-      const result = await this.client.get(req.params.id, req.params)
+      const results = await this.client.find({ user: req.params.id }, req.params)
+      if (results.length) {
+        return _this._response(req, res, results[0])
+      }
+      send(res, 404)
+    })
+
+    app.post('/profiles', async (req, res) => {
+      req.body.uuid = ObjectUtil.uuid4()
+      const result = await this.client.create(req.body)
       if (result) {
         return _this._response(req, res, result)
       }
@@ -23,32 +32,42 @@ class Profiles extends TinyEmitter {
     })
 
     app.put('/profiles/:id', async (req, res) => {
+      req.body._id = undefined
+      req.body.uuid = undefined
+      req.body.user = undefined
       const data = req.body
-      let result = await this.client.get(req.params.id)
-      if (result) {
-        data.uuid = req.params.id
-        result = await this.client.update(req.params.id, result, req.params)
-        return _this._response(req, res, result)
+      let results = await this.client.find({ user: req.params.id }, req.params)
+      if (results.length) {
+        data.uuid = results[0].uuid
+        results = await this.client.update(data.uuid, data, req.params)
+        return _this._response(req, res, results)
       }
       send(res, 404)
     })
 
     app.patch('/profiles/:id', async (req, res) => {
-      let existing = await this.client.get(req.params.id)
-      if (existing) {
-        existing = ObjectUtil.merge(existing, req.body)
-        await this.client.update(req.params.id, existing, req.params)
-        return _this._response(req, res, existing)
+      let results = await this.client.find({ user: req.params.id }, req.params)
+      req.body._id = undefined
+      req.body.uuid = undefined
+      req.body.user = undefined
+      const copy = {}
+      Object.keys(req.body).forEach(key => {
+        if (req.body[key]) copy[key] = req.body[key]
+      })
+      if (results.length) {
+        results = ObjectUtil.merge(results[0], copy)
+        await this.client.update(results.uuid, results, req.params)
+        return _this._response(req, res, results)
       }
       send(res, 404)
     })
 
     app.delete('/profiles/:id', async (req, res) => {
-      let existing = await this.client.get(req.params.id)
-      if (existing) {
-        const result = await this.client.remove(req.params.id, req.params)
-        if (result) {
-          return _this._response(req, res, existing)
+      let results = await this.client.find({ user: req.params.id }, req.params)
+      if (results.length) {
+        results = await this.client.remove(results[0].uuid, req.params)
+        if (results) {
+          return _this._response(req, res, results)
         }
       }
       send(res, 404)
@@ -56,7 +75,7 @@ class Profiles extends TinyEmitter {
   }
 
   _response (req, res, data = {}) {
-    this.emit('message', { method: req.method, id: data.id })
+    this.emit('message', { method: req.method, id: data.user })
     send(res, 200, data)
   }
 
