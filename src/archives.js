@@ -82,6 +82,12 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
               map.title = req.body.title
               map.uuid = undefined
             }
+            if (!map.author) {
+              map.author = {
+                id: req.user.uuid,
+                name: req.user.profile.name
+              }
+            }
             const postRequest = {
               body: map,
               user: req.user
@@ -98,6 +104,12 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
             if (copy) {
               annotation.target.id = mappings[annotation.target.id]
               annotation.uuid = undefined
+            }
+            if (!annotation.author) {
+              annotation.author = {
+                id: req.user.uuid,
+                name: req.user.profile.name
+              }
             }
             const postRequest = {
               body: annotation,
@@ -160,15 +172,15 @@ module.exports.createArchive = async (data) => {
 module.exports.readArchive = archivePath => {
   const results = {}
   const getFile = (entry, zipfile) => {
-    return new Promise((rs, rj) => {
+    return new Promise((resolve, reject) => {
       let data = ''
       zipfile.openReadStream(entry, function (err, readStream) {
-        if (err) return rj(err)
+        if (err) return reject(err)
         readStream.on('data', chunk => {
           data += chunk.toString()
         })
-        readStream.on('end', () => rs(data))
-        readStream.on('error', err => rj(err))
+        readStream.on('end', () => resolve(data))
+        readStream.on('error', err => reject(err))
       })
     })
   }

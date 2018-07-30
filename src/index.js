@@ -80,9 +80,6 @@ const setup = async function () {
   const addUserUUID = require('./middleware/user')
   addUserUUID(app)
 
-  const addAuthor = require('./middleware/author')
-  addAuthor(app)
-
   /**
    * Configure Profiles
    */
@@ -90,6 +87,9 @@ const setup = async function () {
     Profiles = require('./profiles'),
     profiles = new Profiles(app)
   profiles.on('message', message => winston.debug(message))
+
+  const addAuthor = require('./middleware/author')
+  addAuthor(app, profiles)
 
   /**
    * Configure resources

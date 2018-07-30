@@ -14,13 +14,7 @@ class Profiles extends TinyEmitter {
 
     const _this = this
 
-    app.get('/profiles/:id', async (req, res) => {
-      const results = await this.client.find({ user: req.params.id }, req.params)
-      if (results.length) {
-        return _this._response(req, res, results[0])
-      }
-      send(res, 404)
-    })
+    app.get('/profiles/:id', (req, res) => _this.getHandler(req, res))
 
     app.post('/profiles', async (req, res) => {
       req.body.uuid = ObjectUtil.uuid4()
@@ -74,9 +68,26 @@ class Profiles extends TinyEmitter {
     })
   }
 
+  async getHandler (req, res) {
+    console.log(req.params)
+    const results = await this._client.find({ user: req.params.id }, req.params)
+    if (results.length) {
+      return this._response(req, res, results[0])
+    }
+    this._errorResponse(res, 404)
+  }
+
   _response (req, res, data = {}) {
-    this.emit('message', { method: req.method, id: data.user })
-    send(res, 200, data)
+    this.emit('message', { method: req.method, id: data.id })
+    if (typeof res === 'function') res({ data })
+    else if (typeof res === 'undefined') return Promise.resolve({ data })
+    else send(res, 200, data)
+  }
+
+  _errorResponse (res, code, message = undefined) {
+    if (typeof res === 'function') res({ error: true, code })
+    else if (typeof res === 'undefined') return Promise.resolve({ error: true, code })
+    else send(res, code, message)
   }
 
   get client () {
