@@ -7,7 +7,7 @@ const
   os = require('os'),
   multer = require('multer'),
   send = require('@polka/send-type'),
-  { Assert } = require('mbjs-utils')
+  { Assert, ObjectUtil } = require('mbjs-utils')
 
 module.exports.setupArchives = (app, mapService, annotationService) => {
   const upload = multer({ dest: os.tmpdir() })
@@ -129,7 +129,7 @@ module.exports.createArchive = async (data) => {
   Assert.ok(Array.isArray(data.annotations), 'data.annotations must be array')
 
   const
-    dir = path.join(os.tmpdir(), `map_archive_${data.map.uuid}`),
+    dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map.uuid}`),
     archive = new yazl.ZipFile()
 
   await new Promise((resolve, reject) => {

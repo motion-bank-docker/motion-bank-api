@@ -69,7 +69,6 @@ class Profiles extends TinyEmitter {
   }
 
   async getHandler (req, res) {
-    console.log(req.params)
     const results = await this._client.find({ user: req.params.id }, req.params)
     if (results.length) {
       return this._response(req, res, results[0])
@@ -78,7 +77,7 @@ class Profiles extends TinyEmitter {
   }
 
   _response (req, res, data = {}) {
-    this.emit('message', { method: req.method, id: data.id })
+    this.emit('message', { method: req.method, id: data.uuid })
     if (typeof res === 'function') res({ data })
     else if (typeof res === 'undefined') return Promise.resolve({ data })
     else send(res, 200, data)
