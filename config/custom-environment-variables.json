@@ -16,5 +16,10 @@
       "url": "MONGODB_PROFILES_URL",
       "dbName": "MONGODB_PROFILES_DBNAME"
     }
+  },
+  "apiKeys": {
+    "youtube": "YOUTUBE_API_KEY",
+    "vimeo": "VIMEO_ACCESS_TOKEN",
+    "opengraph": "OPENGRAPH_API_KEY"
   }
 }

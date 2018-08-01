@@ -1,11 +1,13 @@
 {
+  "api": {
+    "apiHost": "http://localhost:3030"
+  },
   "http": {
     "host": "localhost",
     "port": 3030
   },
   "resources": {
     "mongodb": {
-      "prefix": "res_",
       "url": "mongodb://localhost:27017/motionbank-api-dev",
       "dbName": "motionbank-api-dev"
     }
@@ -18,23 +20,13 @@
   },
   "profiles": {
     "mongodb": {
-      "prefix": "sys_",
       "url": "mongodb://localhost:27017/motionbank-api-sys-dev",
       "dbName": "motionbank-api-sys-dev"
     }
   },
   "auth": {
-    "jwks": {
-      "cache": true,
-      "rateLimit": true,
-      "jwksRequestsPerMinute": 5,
-      "jwksUri": "https://motionbank.eu.auth0.com/.well-known/jwks.json"
-    },
     "jwt": {
-      "audience": "http://localhost:3030",
-      "issuer": "https://motionbank.eu.auth0.com/",
-      "algorithms": ["RS256"],
-      "credentialsRequired": false
+      "audience": "http://localhost:3030"
     }
   }
 }

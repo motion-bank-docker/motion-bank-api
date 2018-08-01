@@ -1,4 +1,8 @@
 {
+  "api": {
+    "uriBase": "https://app.motionbank.org",
+    "apiHost": "https://api.motionbank.org"
+  },
   "http": {
     "host": "0.0.0.0",
     "port": 3030
@@ -36,5 +40,10 @@
       "algorithms": ["RS256"],
       "credentialsRequired": false
     }
+  },
+  "apiKeys": {
+    "youtube": null,
+    "vimeo": null,
+    "opengraph": null
   }
 }

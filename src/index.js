@@ -108,6 +108,15 @@ const setup = async function () {
   documents.on('message', message => primus.write(message))
 
   /**
+   * Configure sessions
+   */
+
+  const
+    Sessions = require('./sessions'),
+    sessions = new Sessions(app, maps, annotations)
+  sessions.on('message', message => primus.write(message))
+
+  /**
    * Configure archives
    */
 
