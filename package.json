@@ -1,7 +1,7 @@
 {
-  "name": "api-minimal",
+  "name": "api",
   "version": "0.0.1",
-  "description": "A minimalist version of the Motion Bank API",
+  "description": "API server for Motion Bank Systems",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint src/. --config .eslintrc.js",
