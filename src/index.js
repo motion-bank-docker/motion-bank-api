@@ -108,6 +108,15 @@ const setup = async function () {
   documents.on('message', message => primus.write(message))
 
   /**
+   * Configure metadata
+   */
+
+  const
+    Metadata = require('./metadata'),
+    metadata = new Metadata(app, annotations)
+  metadata.on('message', message => primus.write(message))
+
+  /**
    * Configure sessions
    */
 
