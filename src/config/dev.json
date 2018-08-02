@@ -1,5 +1,6 @@
 {
   "api": {
+    "uriBase": "https://app.motionbank.org",
     "apiHost": "http://localhost:3030"
   },
   "http": {
@@ -24,9 +25,26 @@
       "dbName": "motionbank-api-sys-dev"
     }
   },
+  "metadata": {
+    "memcachedURL": null,
+    "lifetime": 86400
+  },
   "auth": {
+    "jwks": {
+      "cache": true,
+      "rateLimit": true,
+      "jwksRequestsPerMinute": 5,
+      "jwksUri": "https://motionbank.eu.auth0.com/.well-known/jwks.json"
+    },
     "jwt": {
-      "audience": "http://localhost:3030"
+      "audience": "http://localhost:3030",
+      "issuer": "https://motionbank.eu.auth0.com/",
+      "algorithms": ["RS256"],
+      "credentialsRequired": false
     }
+  },
+  "apiKeys": {
+    "youtube": null,
+    "vimeo": null
   }
 }
