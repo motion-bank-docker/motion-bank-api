@@ -9,6 +9,14 @@
     "start": "node src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.rlp.net/motionbank/api.git"
+  },
+  "bugs": {
+    "url": "https://gitlab.rlp.net/motionbank/api/issues"
+  },
+  "homepage": "https://gitlab.rlp.net/motionbank/api#readme",
   "author": "Mainz University of Applied Sciences (Motion Bank Project)",
   "license": "MIT",
   "metapak": {
