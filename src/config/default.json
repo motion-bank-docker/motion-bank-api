@@ -1,7 +1,8 @@
 {
   "api": {
     "uriBase": "https://app.motionbank.org",
-    "apiHost": "https://api.motionbank.org"
+    "apiHost": "https://api.motionbank.org",
+    "transcoderHost": "https://transcoder.motionbank.org"
   },
   "http": {
     "host": "0.0.0.0",

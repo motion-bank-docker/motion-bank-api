@@ -1,7 +1,8 @@
 {
   "api": {
     "uriBase": "https://app.motionbank.org",
-    "apiHost": "http://localhost:3030"
+    "apiHost": "http://localhost:3030",
+    "transcoderHost": "http://localhost:4040"
   },
   "http": {
     "host": "localhost",

@@ -32,15 +32,6 @@ const setup = async function () {
   // documents.on('message', message => api._sockets.write(message))
 
   /**
-   * Configure metadata
-   */
-
-  const
-    Metadata = require('./lib/metadata'),
-    metadata = new Metadata(api._app, annotations)
-  // metadata.on('message', message => api._sockets.write(message))
-
-  /**
    * Configure sessions
    */
 

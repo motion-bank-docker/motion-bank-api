@@ -5,7 +5,7 @@ const
   constants = require('mbjs-data-models/src/constants'),
   { ObjectUtil } = require('mbjs-utils'),
   { parseSelector, Sorting } = require('mbjs-data-models/src/lib'),
-  { getMetaData } = require('mbjs-media/src/util/metadata'),
+  axios = require('axios'),
   { DateTime } = require('luxon')
 
 class SessionHelpers {
@@ -35,26 +35,22 @@ const resurrectAnnotation = function (annotation) {
   return annotation
 }
 
-const fetchMetaData = async (videos, user, annotationsService) => {
+const fetchMetaData = async (videos, req) => {
   for (let v of videos) {
     try {
-      const meta = await getMetaData(v.annotation, async query => {
-        const results = await annotationsService.findHandler({
-          query: {
-            query: JSON.stringify(query)
-          },
-          user
-        })
-        return results.data
-      }, config.apiKeys)
-      Object.assign(v.meta, meta)
+      const meta = await axios.get(`${config.api.transcoderHost}/metadata/${v.annotation.uuid}`, {
+        headers: {
+          Authorization: req.headers.authorization
+        }
+      })
+      Object.assign(v.meta, meta.data)
     }
     catch (e) { console.error('fetchMetaData', e.message, e.stack) }
   }
   return videos
 }
 
-const groupBySessions = async function (annotations, user, annotationsService, secondsDist = constants.SESSION_DISTANCE_SECONDS) {
+const groupBySessions = async function (annotations, req, secondsDist = constants.SESSION_DISTANCE_SECONDS) {
   let millisDist = secondsDist * 1000
   annotations = annotations.map(annotation => resurrectAnnotation(annotation)).sort(Sorting.sortOnTarget)
   const videos = annotations.filter(anno => { return anno.body.type === 'Video' })
@@ -64,7 +60,7 @@ const groupBySessions = async function (annotations, user, annotationsService, s
         annotation: annotation
       }
     })
-  await fetchMetaData(videos, user, annotationsService)
+  await fetchMetaData(videos, req)
   annotations = annotations.filter(anno => { return anno.body.type === 'TextualBody' })
   const sessions = []
   const defaultSession = { start: undefined, end: undefined, duration: undefined, annotations: [] }
@@ -127,7 +123,7 @@ class Sessions extends TinyEmitter {
         headers: req.headers
       })
       let annotations = results.data.items
-      const sessions = await groupBySessions(annotations, req.user, _this._annotations)
+      const sessions = await groupBySessions(annotations, req)
       _this._response(req, res, sessions)
     })
   }
