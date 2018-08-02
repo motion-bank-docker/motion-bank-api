@@ -47,7 +47,6 @@
   },
   "apiKeys": {
     "youtube": null,
-    "vimeo": null,
-    "opengraph": null
+    "vimeo": null
   }
 }

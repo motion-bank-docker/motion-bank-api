@@ -23,7 +23,6 @@
   },
   "apiKeys": {
     "youtube": "YOUTUBE_API_KEY",
-    "vimeo": "VIMEO_ACCESS_TOKEN",
-    "opengraph": "OPENGRAPH_API_KEY"
+    "vimeo": "VIMEO_ACCESS_TOKEN"
   }
 }
