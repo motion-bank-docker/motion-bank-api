@@ -2,6 +2,8 @@ const
   config = require('config'),
   send = require('@polka/send-type'),
   TinyEmitter = require('tiny-emitter'),
+  Memcached = require('memcached'),
+  { ObjectUtil } = require('mbjs-utils'),
   { getMetaData } = require('mbjs-media/src/util/metadata')
 
 const fetchMetaData = async (annotation, user, annotationsService) => {
@@ -26,14 +28,36 @@ class Metadata extends TinyEmitter {
     super()
 
     this._annotations = annotationsService
+    if (config.metadata.memcachedURL) this._memcached = new Memcached(config.metadata.memcachedURL)
 
     const _this = this
 
     app.get('/metadata/:id', async (req, res) => {
       const result = await _this._annotations.getHandler(req)
       const annotation = result.data
+      const key = `metadata_${ObjectUtil.slug(annotation.body.source.id)}`
       if (!annotation) return _this._errorResponse(res, 404)
-      const metadata = await fetchMetaData(annotation, req.user, _this._annotations)
+      let metadata
+      if (_this._memcached) {
+        metadata = await new Promise((resolve, reject) => {
+          console.log('memcached key', key)
+          _this._memcached.get(key, function (err, data) {
+            if (err) console.error('failed to get metadata from cache', err.message)
+            resolve(data)
+          })
+        })
+      }
+      if (!metadata) {
+        metadata = await fetchMetaData(annotation, req.user, _this._annotations)
+        if (_this._memcached && metadata) {
+          await new Promise((resolve, reject) => {
+            _this._memcached.set(key, metadata, parseInt(config.metadata.lifetime.toString()), err => {
+              if (err) console.error('failed to store metadata in cache', err.message)
+              resolve()
+            })
+          })
+        }
+      }
       if (!metadata) return _this._errorResponse(res, 404)
       _this._response(req, res, metadata)
     })
