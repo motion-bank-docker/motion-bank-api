@@ -40,7 +40,6 @@ class Metadata extends TinyEmitter {
       let metadata
       if (_this._memcached) {
         metadata = await new Promise((resolve, reject) => {
-          console.log('memcached key', key)
           _this._memcached.get(key, function (err, data) {
             if (err) console.error('failed to get metadata from cache', err.message)
             resolve(data)
