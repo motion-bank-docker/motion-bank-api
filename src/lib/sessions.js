@@ -4,7 +4,7 @@ const
   TinyEmitter = require('tiny-emitter'),
   constants = require('mbjs-data-models/src/constants'),
   { ObjectUtil } = require('mbjs-utils'),
-  { parseSelector, Sorting } = require('mbjs-data-models/src/lib'),
+  { Sorting } = require('mbjs-data-models/src/lib'),
   axios = require('axios'),
   { DateTime } = require('luxon')
 
@@ -20,16 +20,7 @@ const resurrectAnnotation = function (annotation) {
   if (typeof annotation.updated === 'string') annotation.updated = DateTime.fromISO(annotation.updated)
   if (annotation.target && annotation.target.selector) {
     if (typeof annotation.target.selector.value === 'string') {
-      const parsedSelector = parseSelector(annotation.target.selector.value)
-      if (parsedSelector.end) {
-        annotation.target.selector.value = {
-          start: parsedSelector.start,
-          end: parsedSelector.end
-        }
-      }
-      else {
-        annotation.target.selector.value = parsedSelector
-      }
+      annotation.target.selector.value = DateTime.fromISO(annotation.target.selector.value)
     }
   }
   return annotation
