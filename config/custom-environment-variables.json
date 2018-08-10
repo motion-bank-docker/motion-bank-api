@@ -1,4 +1,13 @@
 {
+  "api": {
+    "uriBase": "API_URI_BASE",
+    "apiHost": "API_HOST",
+    "transcoderHost": "API_TRANSCODER_HOST"
+  },
+  "http": {
+    "host": "HOST",
+    "port": "PORT"
+  },
   "resources": {
     "mongodb": {
       "url": "MONGODB_RESOURCES_URL",
@@ -24,5 +33,10 @@
   "apiKeys": {
     "youtube": "YOUTUBE_API_KEY",
     "vimeo": "VIMEO_ACCESS_TOKEN"
+  },
+  "auth": {
+    "jwt": {
+      "audience": "AUTH0_AUDIENCE"
+    }
   }
 }
