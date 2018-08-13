@@ -35,7 +35,7 @@ class Service extends TinyEmitter {
       if (req.user && entry.author && entry.author.id === user) allowed = true
       else {
         try {
-          allowed = await this._acl.isAllowed('public', entry.uuid, 'get')
+          allowed = await this._acl.areAnyRolesAllowed(['public'], entry.uuid, ['get'])
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
@@ -53,7 +53,7 @@ class Service extends TinyEmitter {
       if (req.user && result.author && result.author.id === req.user.uuid) allowed = true
       else {
         try {
-          allowed = await this._acl.isAllowed('public', result.uuid, 'get')
+          allowed = await this._acl.areAnyRolesAllowed(['public'], result.uuid, ['get'])
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
