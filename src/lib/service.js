@@ -32,10 +32,10 @@ class Service extends TinyEmitter {
     const items = []
     for (let entry of results) {
       let allowed = false
-      if (entry.author && entry.author.id === user) allowed = true
+      if (req.user && entry.author && entry.author.id === user) allowed = true
       else {
         try {
-          allowed = await this._acl.isAllowed(user, entry.uuid, 'get')
+          allowed = await this._acl.isAllowed('public', entry.uuid, 'get')
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
@@ -48,13 +48,12 @@ class Service extends TinyEmitter {
 
   async getHandler (req, res) {
     const result = await this.client.get(req.params.id, req.params)
-    const user = req.user ? req.user.uuid : 'anon'
     if (result) {
       let allowed = false
-      if (result.author && result.author.id === user) allowed = true
+      if (req.user && result.author && result.author.id === req.user.uuid) allowed = true
       else {
         try {
-          allowed = await this._acl.isAllowed(user, result.uuid, 'get')
+          allowed = await this._acl.isAllowed('public', result.uuid, 'get')
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
