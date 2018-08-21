@@ -1,5 +1,5 @@
-const setup = async function (app, profileService) {
-  app.use(async (req, res, next) => {
+const setup = async function (api, profileService) {
+  api.app.use(async (req, res, next) => {
     const r = {
       params: {
         id: req.user.uuid

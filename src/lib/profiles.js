@@ -6,7 +6,7 @@ const
   { MongoDB } = require('mbjs-persistence')
 
 class Profiles extends TinyEmitter {
-  constructor (app) {
+  constructor (api) {
     super()
 
     // TODO: make db adapter configurable (nedb, etc.)
@@ -14,9 +14,9 @@ class Profiles extends TinyEmitter {
 
     const _this = this
 
-    app.get('/profiles/:id', (req, res) => _this.getHandler(req, res))
+    api.app.get('/profiles/:id', (req, res) => _this.getHandler(req, res))
 
-    app.post('/profiles', async (req, res) => {
+    api.app.post('/profiles', async (req, res) => {
       req.body.uuid = ObjectUtil.uuid4()
       const result = await this.client.create(req.body)
       if (result) {
@@ -25,7 +25,7 @@ class Profiles extends TinyEmitter {
       send(res, 404)
     })
 
-    app.put('/profiles/:id', async (req, res) => {
+    api.app.put('/profiles/:id', async (req, res) => {
       req.body._id = undefined
       req.body.uuid = undefined
       req.body.user = undefined
@@ -39,7 +39,7 @@ class Profiles extends TinyEmitter {
       send(res, 404)
     })
 
-    app.patch('/profiles/:id', async (req, res) => {
+    api.app.patch('/profiles/:id', async (req, res) => {
       let results = await this.client.find({ user: req.params.id }, req.params)
       req.body._id = undefined
       req.body.uuid = undefined
@@ -56,7 +56,7 @@ class Profiles extends TinyEmitter {
       send(res, 404)
     })
 
-    app.delete('/profiles/:id', async (req, res) => {
+    api.app.delete('/profiles/:id', async (req, res) => {
       let results = await this.client.find({ user: req.params.id }, req.params)
       if (results.length) {
         results = await this.client.remove(results[0].uuid, req.params)

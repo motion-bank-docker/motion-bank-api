@@ -9,11 +9,11 @@ const setup = async function () {
    */
   const
     Profiles = require('./lib/profiles'),
-    profiles = new Profiles(api._app)
+    profiles = new Profiles(api)
   // profiles.on('message', message => api._logger.debug(message))
 
   const addAuthor = require('./middleware/author')
-  addAuthor(api._app, profiles)
+  addAuthor(api, profiles)
 
   /**
    * Configure resources
@@ -22,10 +22,10 @@ const setup = async function () {
     models = require('mbjs-data-models'),
     Service = require('./lib/service')
 
-  const annotations = new Service('annotations', api._app, models.Annotation, api._logger, api._acl)
+  const annotations = new Service('annotations', api, models.Annotation)
   // annotations.on('message', message => api._sockets.write(message))
 
-  const maps = new Service('maps', api._app, models.Map, api._logger, api._acl)
+  const maps = new Service('maps', api, models.Map)
   // maps.on('message', message => api._sockets.write(message))
 
   // const documents = new Service('documents', api._app, models.Document, api._logger, api._acl)
@@ -37,7 +37,7 @@ const setup = async function () {
 
   const
     Sessions = require('./lib/sessions'),
-    sessions = new Sessions(api._app, maps, annotations)
+    sessions = new Sessions(api, maps, annotations)
   // sessions.on('message', message => api._logger.write(message))
 
   /**
@@ -45,7 +45,7 @@ const setup = async function () {
    */
 
   const archives = require('./lib/archives')
-  archives.setupArchives(api._app, maps, annotations)
+  archives.setupArchives(api, maps, annotations)
 
   await api.start()
 }

@@ -9,9 +9,9 @@ const
   send = require('@polka/send-type'),
   { Assert, ObjectUtil } = require('mbjs-utils')
 
-module.exports.setupArchives = (app, mapService, annotationService) => {
+module.exports.setupArchives = (api, mapService, annotationService) => {
   const upload = multer({ dest: os.tmpdir() })
-  app.post('/archives/maps', async (req, res) => {
+  api.app.post('/archives/maps', async (req, res) => {
     let data = {}
     let request = {
       params: {
@@ -36,7 +36,7 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
       })
     })
   })
-  app.get('/archives/maps/:id', async (req, res) => {
+  api.app.get('/archives/maps/:id', async (req, res) => {
     const filename = `map_archive_${req.params.id}.zip`
     const filePath = path.join(os.tmpdir(), filename)
     const file = fs.createReadStream(filePath)
@@ -44,7 +44,7 @@ module.exports.setupArchives = (app, mapService, annotationService) => {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
     file.pipe(res)
   })
-  app.post('/archives/maps/upload', async function (req, res) {
+  api.app.post('/archives/maps/upload', async function (req, res) {
     upload.single('file')(req, res, async () => {
       const results = await exports.readArchive(req.file.path)
       const copy = req.body.title || false

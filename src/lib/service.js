@@ -6,24 +6,24 @@ const
   { MongoDB } = require('mbjs-persistence')
 
 class Service extends TinyEmitter {
-  constructor (name, app, model, logger, acl) {
+  constructor (name, api, model) {
     super()
 
     const _this = this
 
     this._name = name
-    this._acl = acl
-    this._logger = logger
+    this._acl = api.acl
+    this._logger = api.logger
     this._Model = model
     // TODO: make db adapter configurable (nedb, etc.)
-    this._client = new MongoDB(ObjectUtil.merge({ name, logger }, config.get('resources.mongodb')), 'uuid')
+    this._client = new MongoDB(ObjectUtil.merge({ name, logger: api.logger }, config.get('resources.mongodb')), 'uuid')
 
-    app.get(`/${this._name}`, (req, res) => _this.findHandler(req, res))
-    app.get(`/${this._name}/:id`, (req, res) => _this.getHandler(req, res))
-    app.post(`/${this._name}`, (req, res) => _this.postHandler(req, res))
-    app.put(`/${this._name}/:id`, (req, res) => _this.putHandler(req, res))
-    app.patch(`/${this._name}/:id`, (req, res) => _this.patchHandler(req, res))
-    app.delete(`/${this._name}/:id`, (req, res) => _this.deleteHandler(req, res))
+    api.app.get(`/${this._name}`, (req, res) => _this.findHandler(req, res))
+    api.app.get(`/${this._name}/:id`, (req, res) => _this.getHandler(req, res))
+    api.app.post(`/${this._name}`, (req, res) => _this.postHandler(req, res))
+    api.app.put(`/${this._name}/:id`, (req, res) => _this.putHandler(req, res))
+    api.app.patch(`/${this._name}/:id`, (req, res) => _this.patchHandler(req, res))
+    api.app.delete(`/${this._name}/:id`, (req, res) => _this.deleteHandler(req, res))
   }
 
   async findHandler (req, res) {

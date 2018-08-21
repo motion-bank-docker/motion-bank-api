@@ -26,7 +26,7 @@ const resurrectAnnotation = function (annotation) {
   return annotation
 }
 
-const fetchMetaData = async (videos, req) => {
+const fetchMetaData = async (videos, req, api) => {
   for (let v of videos) {
     try {
       const meta = await axios.get(`${config.api.transcoderHost}/metadata/${v.annotation.uuid}`, {
@@ -36,12 +36,12 @@ const fetchMetaData = async (videos, req) => {
       })
       Object.assign(v.meta, meta.data)
     }
-    catch (e) { console.error('fetchMetaData', e.message, e.stack) }
+    catch (e) { api.captureException(e) }
   }
   return videos
 }
 
-const groupBySessions = async function (annotations, req, secondsDist = constants.SESSION_DISTANCE_SECONDS) {
+const groupBySessions = async function (annotations, req, api, secondsDist = constants.SESSION_DISTANCE_SECONDS) {
   let millisDist = secondsDist * 1000
   annotations = annotations.map(annotation => resurrectAnnotation(annotation)).sort(Sorting.sortOnTarget)
   const videos = annotations.filter(anno => { return anno.body.type === 'Video' })
@@ -51,7 +51,7 @@ const groupBySessions = async function (annotations, req, secondsDist = constant
         annotation: annotation
       }
     })
-  await fetchMetaData(videos, req)
+  await fetchMetaData(videos, req, api)
   annotations = annotations.filter(anno => { return anno.body.type === 'TextualBody' })
   const sessions = []
   const defaultSession = { start: undefined, end: undefined, duration: undefined, annotations: [] }
@@ -92,7 +92,7 @@ const groupBySessions = async function (annotations, req, secondsDist = constant
 }
 
 class Sessions extends TinyEmitter {
-  constructor (app, mapsService, annotationsService) {
+  constructor (api, mapsService, annotationsService) {
     super()
 
     this._maps = mapsService
@@ -100,7 +100,7 @@ class Sessions extends TinyEmitter {
 
     const _this = this
 
-    app.get('/sessions/:id', async (req, res) => {
+    api.app.get('/sessions/:id', async (req, res) => {
       let results = await _this._maps.getHandler(req)
       const map = results.data
       if (!map) return _this._errorResponse(res, 404)
@@ -114,7 +114,7 @@ class Sessions extends TinyEmitter {
         headers: req.headers
       })
       let annotations = results.data.items
-      const sessions = await groupBySessions(annotations, req)
+      const sessions = await groupBySessions(annotations, req, api)
       _this._response(req, res, sessions)
     })
   }
