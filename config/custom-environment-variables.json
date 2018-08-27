@@ -2,7 +2,8 @@
   "api": {
     "uriBase": "API_URI_BASE",
     "apiHost": "API_HOST",
-    "transcoderHost": "API_TRANSCODER_HOST"
+    "transcoderHost": "API_TRANSCODER_HOST",
+    "auth0AppMetadataPrefix": "AUTH0_APP_METADATA_PREFIX"
   },
   "http": {
     "host": "HOST",
