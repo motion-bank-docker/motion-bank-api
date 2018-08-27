@@ -28,14 +28,15 @@ class Service extends TinyEmitter {
 
   async findHandler (req, res) {
     let results = await this._client.find(JSON.parse(req.query.query || '{}'), req.params)
-    const user = req.user ? req.user.uuid : 'anon'
+    const userId = req.user ? req.user.uuid : 'anon'
+    const roles = req.user ? req.user[`${config.api.auth0AppMetadataPrefix}roles`] || [] : []
     const items = []
     for (let entry of results) {
       let allowed = false
-      if (req.user && entry.author && entry.author.id === user) allowed = true
+      if (req.user && entry.author && entry.author.id === userId) allowed = true
       else {
         try {
-          allowed = await this._acl.areAnyRolesAllowed(['public'], entry.uuid, ['get'])
+          allowed = await this._acl.areAnyRolesAllowed(['public'].concat(roles), entry.uuid, ['get'])
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
@@ -48,12 +49,13 @@ class Service extends TinyEmitter {
 
   async getHandler (req, res) {
     const result = await this.client.get(req.params.id, req.params)
+    const roles = req.user ? req.user[`${config.api.auth0AppMetadataPrefix}roles`] || [] : []
     if (result) {
       let allowed = false
       if (req.user && result.author && result.author.id === req.user.uuid) allowed = true
       else {
         try {
-          allowed = await this._acl.areAnyRolesAllowed(['public'], result.uuid, ['get'])
+          allowed = await this._acl.areAnyRolesAllowed(['public'].concat(roles), result.uuid, ['get'])
         }
         catch (err) {
           this._logger.error(`ACL error: ${err.message}`)
