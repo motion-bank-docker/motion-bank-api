@@ -1,3 +1,5 @@
+const { ObjectUtil } = require('mbjs-utils')
+
 const setup = async function (api, profileService) {
   api.app.use(async (req, res, next) => {
     if (req.user) {
@@ -7,7 +9,8 @@ const setup = async function (api, profileService) {
         },
         user: req.user
       }
-      req.user.profile = await profileService.getHandler(r)
+      const result = await profileService.getHandler(r)
+      req.user.profile = ObjectUtil.merge({}, req.user.profile, result.data)
       if (req.method.toLowerCase() === 'post') {
         req.body.author = {
           id: req.user.uuid,

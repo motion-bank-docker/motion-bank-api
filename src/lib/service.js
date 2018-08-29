@@ -29,7 +29,7 @@ class Service extends TinyEmitter {
   async findHandler (req, res) {
     let results = await this._client.find(JSON.parse(req.query.query || '{}'), req.params)
     const userId = req.user ? req.user.uuid : 'anon'
-    const roles = req.user ? req.user[`${config.api.auth0AppMetadataPrefix}roles`] || [] : []
+    const roles = req.user ? req.user.profile[`${config.api.auth0AppMetadataPrefix}roles`] || [] : []
     const items = []
     for (let entry of results) {
       let allowed = false
