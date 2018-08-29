@@ -31,6 +31,10 @@
     "memcachedURL": null,
     "lifetime": 86400
   },
+  "memcached": {
+    "url": null,
+    "lifetime": 86400
+  },
   "auth": {
     "jwks": {
       "cache": true,
