@@ -10,7 +10,7 @@ const setup = async function (api, profileService) {
         user: req.user
       }
       const result = await profileService.getHandler(r)
-      req.user.profile = ObjectUtil.merge({}, req.user.profile, result.data)
+      req.user.profile = ObjectUtil.merge({}, req.user.profile, result ? result.data : undefined)
       if (req.method.toLowerCase() === 'post') {
         req.body.author = {
           id: req.user.uuid,
