@@ -59,6 +59,10 @@ const proc = async function () {
       anno.target.id = `${newPrefix}annotations/${anno.target.id}`
       console.log('updating video target to', anno.target.id)
     }
+    if (anno.target.type === 'Annotation' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
+      anno.target.id = `${newPrefix}annotations/${anno.target.id}`
+      console.log('updating annotation target to', anno.target.id)
+    }
     if (anno.target.type === 'Timeline' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
       anno.target.id = `${newPrefix}maps/${anno.target.id}`
       console.log('updating timeline target to', anno.target.id)
