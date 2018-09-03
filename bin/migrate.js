@@ -47,27 +47,27 @@ const proc = async function () {
       anno.author = { id: anno.author }
       console.log('updating author to', anno.author)
     }
-    if (typeof anno.target.id === 'string' && anno.target.id.indexOf(timelinePrefix) === 0) {
+    if (anno.target && typeof anno.target.id === 'string' && anno.target.id.indexOf(timelinePrefix) === 0) {
       anno.target.id = anno.target.id.replace(timelinePrefix, `${newPrefix}maps/`)
       console.log('updating timeline target to', anno.target.id)
     }
-    if (typeof anno.target.id === 'string' && anno.target.id.indexOf(gridPrefix) === 0) {
+    if (anno.target && typeof anno.target.id === 'string' && anno.target.id.indexOf(gridPrefix) === 0) {
       anno.target.id = anno.target.id.replace(gridPrefix, `${newPrefix}maps/`)
       console.log('updating grid target to', anno.target.id)
     }
-    if (anno.target.type === 'Video' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
+    if (anno.target && anno.target.type === 'Video' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
       anno.target.id = `${newPrefix}annotations/${anno.target.id}`
       console.log('updating video target to', anno.target.id)
     }
-    if (anno.target.type === 'Annotation' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
+    if (anno.target && anno.target.type === 'Annotation' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
       anno.target.id = `${newPrefix}annotations/${anno.target.id}`
       console.log('updating annotation target to', anno.target.id)
     }
-    if (anno.target.type === 'Timeline' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
+    if (anno.target && anno.target.type === 'Timeline' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
       anno.target.id = `${newPrefix}maps/${anno.target.id}`
       console.log('updating timeline target to', anno.target.id)
     }
-    if (anno.target.type === '2DGrid' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
+    if (anno.target && anno.target.type === '2DGrid' && typeof anno.target.id === 'string' && uuid.isUUID(anno.target.id)) {
       anno.target.id = `${newPrefix}maps/${anno.target.id}`
       console.log('updating grid target to', anno.target.id)
     }
