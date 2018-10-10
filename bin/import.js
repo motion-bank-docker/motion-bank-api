@@ -35,7 +35,9 @@ const proc = async function (folder) {
     if (m[0] === '.') continue
     const file = await fs.readFile(path.join(folder, 'maps', m))
     const entry = JSON.parse(file)
-    await mapsClient.create(updateAuthor(entry))
+    const existing = await mapsClient.get(entry.uuid)
+    if (existing) await mapsClient.update(entry.uuid, updateAuthor(entry))
+    else await mapsClient.create(updateAuthor(entry))
   }
 
   const annoClient = new MongoDB(
@@ -49,7 +51,9 @@ const proc = async function (folder) {
     if (a[0] === '.') continue
     const file = await fs.readFile(path.join(folder, 'annotations', a))
     const entry = JSON.parse(file)
-    await annoClient.create(updateAuthor(entry))
+    const existing = await annoClient.get(entry.uuid)
+    if (existing) await annoClient.update(entry.uuid, updateAuthor(entry))
+    else await annoClient.create(updateAuthor(entry))
   }
 
   const cfg = config.get('acl.mongodb')
