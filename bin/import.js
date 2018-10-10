@@ -1,4 +1,7 @@
 const
+  Acl = require('acl'),
+  Backend = Acl.mongodbBackend,
+  MongoClient = require('mongodb').MongoClient,
   path = require('path'),
   fs = require('mz/fs'),
   { MongoDB } = require('mbjs-persistence'),
@@ -29,6 +32,7 @@ const proc = async function (folder) {
   await mapsClient.connect()
   const maps = await fs.readdir(path.join(folder, 'maps'))
   for (let m of maps) {
+    if (m[0] === '.') continue
     const file = await fs.readFile(path.join(folder, 'maps', m))
     const entry = JSON.parse(file)
     await mapsClient.create(updateAuthor(entry))
@@ -42,11 +46,38 @@ const proc = async function (folder) {
   await annoClient.connect()
   const annos = await fs.readdir(path.join(folder, 'annotations'))
   for (let a of annos) {
+    if (a[0] === '.') continue
     const file = await fs.readFile(path.join(folder, 'annotations', a))
     const entry = JSON.parse(file)
     await annoClient.create(updateAuthor(entry))
   }
+
+  const cfg = config.get('acl.mongodb')
+  cfg.logger = console
+
+  const db = await new Promise((resolve, reject) => {
+    MongoClient.connect(cfg.url, function (err, client) {
+      if (err) return reject(err)
+      cfg.logger.info(`ACL connected at ${cfg.url}/${cfg.dbName}`)
+      const db = client.db(cfg.dbName)
+      resolve(db)
+    })
+  })
+
+  const acl = new Acl(new Backend(db))
+  const acls = await fs.readdir(path.join(folder, 'acl'))
+  for (let a of acls) {
+    if (a[0] === '.') continue
+    const file = await fs.readFile(path.join(folder, 'acl', a))
+    const entry = JSON.parse(file)
+    await new Promise((resolve, reject) => {
+      const resource = a.replace('.json', '')
+      acl.allow(entry.role, resource, entry.permissions, err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }
 }
 
-proc(folder)
-  .then(() => process.exit(0))
+proc(folder).then(() => process.exit(0))
