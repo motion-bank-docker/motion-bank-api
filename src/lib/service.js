@@ -92,6 +92,7 @@ class Service extends TinyEmitter {
     let result = await this.client.get(req.params.id)
     if (result) {
       // TODO: transactions anyone?!
+      if (req.user.uuid !== result.uuid) return this._errorResponse(res, 403)
       data.uuid = req.params.id
       let instance = new this.ModelConstructor(data, req.params.id)
       await this.client.update(req.params.id, instance, req.params)
@@ -104,6 +105,7 @@ class Service extends TinyEmitter {
     const data = req.body
     let existing = await this.client.get(req.params.id)
     if (existing) {
+      if (req.user.uuid !== existing.uuid) return this._errorResponse(res, 403)
       let instance = new this.ModelConstructor(existing, req.params.id)
       instance.populate(ObjectUtil.merge(instance.toObject(), data))
       await this.client.update(req.params.id, instance, req.params)
@@ -115,6 +117,7 @@ class Service extends TinyEmitter {
   async deleteHandler (req, res) {
     let existing = await this.client.get(req.params.id)
     if (existing) {
+      if (req.user.uuid !== existing.uuid) return this._errorResponse(res, 403)
       const result = await this.client.remove(req.params.id, req.params)
       if (result) {
         return this._response(req, res, existing)
