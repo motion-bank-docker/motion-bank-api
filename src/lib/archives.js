@@ -173,6 +173,7 @@ module.exports.createArchive = async (data) => {
   opts.port = config.assets.client.port ? parseInt(config.assets.client.port) : undefined
   const minioClient = new Minio.Client(opts)
   await minioClient.fPutObject(config.assets.archivesBucket, path.basename(archivePath), archivePath, { 'Content-Type': 'application/zip' })
+  await fs.unlink(archivePath)
   const url = await minioClient.presignedGetObject(config.assets.archivesBucket, path.basename(archivePath))
 
   return url
