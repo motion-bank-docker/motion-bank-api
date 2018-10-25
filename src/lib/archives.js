@@ -26,7 +26,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       data.map = result.data
       request = {
         query: {
-          query: JSON.stringify({'target.id': data.map.uuid})
+          query: JSON.stringify({'target.id': `${config.api.uriBase}/maps/${data.map.uuid}`})
         },
         user: req.user
       }
