@@ -7,6 +7,8 @@ const
   os = require('os'),
   multer = require('multer'),
   send = require('@polka/send-type'),
+  config = require('config'),
+  Minio = require('minio'),
   { Assert, ObjectUtil } = require('mbjs-utils')
 
 module.exports.setupArchives = (api, mapService, annotationService) => {
@@ -31,8 +33,8 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       await annotationService.findHandler(request, async result => {
         if (result.error) return send(res, result.code)
         data.annotations = result.data.items
-        const fileId = await exports.createArchive(data)
-        send(res, 200, fileId)
+        const url = await exports.createArchive(data)
+        send(res, 200, url)
       })
     })
   })
@@ -166,7 +168,14 @@ module.exports.createArchive = async (data) => {
       })
   })
 
-  return path.basename(data.map.uuid)
+  const opts = Object.assign({}, config.assets.client)
+  opts.useSSL = config.assets.client.useSSL && (config.assets.client.useSSL === true || config.assets.client.useSSL === 'true')
+  opts.port = config.assets.client.port ? parseInt(config.assets.client.port) : undefined
+  const minioClient = new Minio.Client(opts)
+  await minioClient.fPutObject(config.assets.archivesBucket, path.basename(archivePath), archivePath, { 'Content-Type': 'application/zip' })
+  const url = await minioClient.presignedGetObject(config.assets.archivesBucket, path.basename(archivePath))
+
+  return url
 }
 
 module.exports.readArchive = archivePath => {

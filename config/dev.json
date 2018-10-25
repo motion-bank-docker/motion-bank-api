@@ -9,6 +9,17 @@
     "host": "localhost",
     "port": 3030
   },
+  "assets": {
+    "host": null,
+    "client": {
+      "endPoint": "assets.motionbank.org",
+      "port": 443,
+      "useSSL": true,
+      "accessKey": null,
+      "secretKey": null
+    },
+    "archivesBucket": "piecemaker-archives-dev"
+  },
   "resources": {
     "mongodb": {
       "url": "mongodb://localhost:27017/motionbank-api-dev",
