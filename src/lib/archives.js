@@ -38,14 +38,6 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       })
     })
   })
-  api.app.get('/archives/maps/:id', async (req, res) => {
-    const filename = `map_archive_${req.params.id}.zip`
-    const filePath = path.join(os.tmpdir(), filename)
-    const file = fs.createReadStream(filePath)
-    res.setHeader('Content-Type', 'application/zip')
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
-    file.pipe(res)
-  })
   api.app.post('/archives/maps/upload', async function (req, res) {
     upload.single('file')(req, res, async () => {
       const results = await exports.readArchive(req.file.path)
@@ -126,20 +118,23 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
   })
 }
 
-module.exports.createArchive = async (data) => {
+module.exports.createArchive = async data => {
   Assert.isType(data.map, 'object', 'data.map must be object')
   Assert.ok(Array.isArray(data.annotations), 'data.annotations must be array')
 
-  const
-    dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map.uuid}`),
-    archive = new yazl.ZipFile()
+  const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map.uuid}`)
 
   await new Promise((resolve, reject) => {
     rimraf(dir, err => {
-      if (err) return reject(err)
+      if (err) {
+        api.captureException(err)
+        return reject(err)
+      }
       resolve()
     })
   })
+
+  const archive = new yazl.ZipFile()
 
   await fs.mkdir(dir)
   await fs.mkdir(path.join(dir, 'maps'))

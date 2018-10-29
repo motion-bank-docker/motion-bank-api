@@ -12,6 +12,7 @@ class Service extends TinyEmitter {
     const _this = this
 
     this._name = name
+    this._captureException = api.captureException
     this._acl = api.acl
     this._logger = api.logger
     this._Model = model
@@ -27,7 +28,14 @@ class Service extends TinyEmitter {
   }
 
   async findHandler (req, res) {
-    let results = await this._client.find(JSON.parse(req.query.query || '{}'), req.params)
+    let results
+    try {
+      results = await this._client.find(JSON.parse(req.query.query || '{}'), req.params)
+    }
+    catch (err) {
+      this._captureException(err)
+      return this._errorResponse(res, 500)
+    }
     const userId = req.user ? req.user.uuid : 'anon'
     const roles = req.user ? req.user.profile.roles : ['public']
     const items = []
@@ -39,7 +47,7 @@ class Service extends TinyEmitter {
           allowed = await this._acl.areAnyRolesAllowed(roles, entry.uuid, ['get'])
         }
         catch (err) {
-          this._logger.error(`ACL error: ${err.message}`)
+          this._captureException(err)
         }
       }
       if (allowed) items.push(entry)
@@ -48,7 +56,14 @@ class Service extends TinyEmitter {
   }
 
   async getHandler (req, res) {
-    const result = await this.client.get(req.params.id, req.params)
+    let result
+    try {
+      result = await this.client.get(req.params.id, req.params)
+    }
+    catch (err) {
+      this._captureException(err)
+      return this._errorResponse(res, 500)
+    }
     const roles = req.user ? req.user.profile.roles : ['public']
     if (result) {
       let allowed = false
@@ -58,7 +73,7 @@ class Service extends TinyEmitter {
           allowed = await this._acl.areAnyRolesAllowed(['public'].concat(roles), result.uuid, ['get'])
         }
         catch (err) {
-          this._logger.error(`ACL error: ${err.message}`)
+          this._captureException(err)
         }
       }
       if (allowed) {
@@ -75,52 +90,104 @@ class Service extends TinyEmitter {
       ctx = this,
       data = req.body
     if (Array.isArray(data)) {
-      const results = await Promise.all(data.map(entry => {
-        return ctx.create(entry, req.params)
-      }))
-      return this._response(req, res, results)
+      try {
+        const results = await Promise.all(data.map(entry => {
+          return ctx.create(entry, req.params)
+        }))
+        return this._response(req, res, results)
+      }
+      catch (err) {
+        this._captureException(err)
+        return this._errorResponse(res, 500)
+      }
     }
     // TODO: allow for full array inserts instead just single requests
-    const instance = new this.ModelConstructor(data),
-      result = await this.client.create(instance, req.params)
-    instance.populate(result)
-    return this._response(req, res, instance)
+    // TODO: throw bad request error / validate input
+    try {
+      const instance = new this.ModelConstructor(data),
+        result = await this.client.create(instance, req.params)
+      instance.populate(result)
+      this._response(req, res, instance)
+    }
+    catch (err) {
+      this._captureException(err)
+      this._errorResponse(res, 500)
+    }
   }
 
   async putHandler (req, res) {
     const data = req.body
-    let result = await this.client.get(req.params.id)
+    let result
+    try {
+      result = await this.client.get(req.params.id)
+    }
+    catch (err) {
+      this._captureException(err)
+      return this._errorResponse(res, 500)
+    }
     if (result) {
       // TODO: transactions anyone?!
       if (req.user.uuid !== result.author.id) return this._errorResponse(res, 403)
       data.uuid = req.params.id
-      let instance = new this.ModelConstructor(data, req.params.id)
-      await this.client.update(req.params.id, instance, req.params)
-      return this._response(req, res, instance)
+      try {
+        let instance = new this.ModelConstructor(data, req.params.id)
+        await this.client.update(req.params.id, instance, req.params)
+        return this._response(req, res, instance)
+      }
+      catch (err) {
+        this._captureException(err)
+        this._errorResponse(res, 500)
+      }
     }
     else return this._errorResponse(res, 404)
   }
 
   async patchHandler (req, res) {
     const data = req.body
-    let existing = await this.client.get(req.params.id)
+    let existing
+    try {
+      existing = await this.client.get(req.params.id)
+    }
+    catch (err) {
+      this._captureException(err)
+      return this._errorResponse(res, 500)
+    }
     if (existing) {
       if (req.user.uuid !== existing.author.id) return this._errorResponse(res, 403)
-      let instance = new this.ModelConstructor(existing, req.params.id)
-      instance.populate(ObjectUtil.merge(instance.toObject(), data))
-      await this.client.update(req.params.id, instance, req.params)
-      return this._response(req, res, instance)
+      try {
+        let instance = new this.ModelConstructor(existing, req.params.id)
+        instance.populate(ObjectUtil.merge(instance.toObject(), data))
+        await this.client.update(req.params.id, instance, req.params)
+        return this._response(req, res, instance)
+      }
+      catch (err) {
+        this._captureException(err)
+        this._errorResponse(res, 500)
+      }
     }
     else return this._errorResponse(res, 404)
   }
 
   async deleteHandler (req, res) {
-    let existing = await this.client.get(req.params.id)
+    let existing
+    try {
+      existing = await this.client.get(req.params.id)
+    }
+    catch (err) {
+      this._captureException(err)
+      return this._errorResponse(res, 500)
+    }
     if (existing) {
       if (req.user.uuid !== existing.author.id) return this._errorResponse(res, 403)
-      const result = await this.client.remove(req.params.id, req.params)
-      if (result) {
-        return this._response(req, res, existing)
+      try {
+        const result = await this.client.remove(req.params.id, req.params)
+        if (result) {
+          return this._response(req, res, existing)
+        }
+      }
+      catch (err) {
+        this._captureException(err)
+        this._errorResponse(res, 500)
       }
     }
     else return this._errorResponse(res, 404)
