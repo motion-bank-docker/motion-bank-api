@@ -7,7 +7,10 @@
     "lint": "eslint src/. --config .eslintrc.js",
     "metapak": "metapak",
     "start": "node src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker-build": "docker build -t motionbank/api:latest .",
+    "docker-push": "docker push motionbank/api:latest",
+    "docker-release": "npm run docker-build && npm run docker-push"
   },
   "repository": {
     "type": "git",
