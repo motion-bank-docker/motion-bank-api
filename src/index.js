@@ -28,7 +28,7 @@ const setup = async function () {
   const maps = new Service('maps', api, models.Map)
   // maps.on('message', message => api._sockets.write(message))
 
-  // const documents = new Service('documents', api._app, models.Document, api._logger, api._acl)
+  const documents = new Service('documents', api, models.Document)
   // documents.on('message', message => api._sockets.write(message))
 
   /**
