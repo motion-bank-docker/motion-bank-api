@@ -16,6 +16,6 @@ The docker image can be pulled with the tag `motionbank/api:latest`.
 
 ## License
 
-:copyright: 2018 Mainz University of Applied Sciences (Motion Bank Project) – 
+:copyright: 2019 Mainz University of Applied Sciences (Motion Bank Project) – 
 Released under the [MIT](https://github.com/motionbank-js/api/blob/master/LICENSE) license
 
