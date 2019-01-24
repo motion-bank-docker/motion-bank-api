@@ -1,4 +1,6 @@
-const GenericAPI = require('mbjs-generic-api')
+const
+  config = require('config'),
+  GenericAPI = require('mbjs-generic-api')
 
 const setup = async function () {
   const api = new GenericAPI()
@@ -12,15 +14,15 @@ const setup = async function () {
     profiles = new Profiles(api)
   // profiles.on('message', message => api._logger.debug(message))
 
-  const addAuthor = require('./middleware/author')
-  addAuthor(api, profiles)
+  const addAuthor = require('mbjs-generic-api/src/middleware/author')
+  addAuthor(api, config)
 
   /**
    * Configure resources
    */
   const
     models = require('mbjs-data-models'),
-    Service = require('./lib/service')
+    Service = require('mbjs-generic-api/src/lib/service')
 
   const annotations = new Service('annotations', api, models.Annotation)
   // annotations.on('message', message => api._sockets.write(message))
