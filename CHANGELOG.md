@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Author middleware and base Service class now in [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
 - Author middleware now retrieves profile via external HTTP request
 
+### Fixed
+
+- Missing api reference in createArchive method
+
 ### Removed
 
 - Project specific script `bin/digitanz-fix.js`

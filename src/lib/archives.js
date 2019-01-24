@@ -33,7 +33,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       await annotationService.findHandler(request, async result => {
         if (result.error) return send(res, result.code)
         data.annotations = result.data.items
-        const url = await exports.createArchive(data)
+        const url = await exports.createArchive(api, data)
         send(res, 200, url)
       })
     })
@@ -118,7 +118,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
   })
 }
 
-module.exports.createArchive = async data => {
+module.exports.createArchive = async (api, data) => {
   Assert.isType(data.map, 'object', 'data.map must be object')
   Assert.ok(Array.isArray(data.annotations), 'data.annotations must be array')
 
