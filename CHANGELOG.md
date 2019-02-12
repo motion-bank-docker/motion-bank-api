@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Find methods now detect and parse regular expressions in JSON-encoded query parameter
 - Allow setting ACL through URL query parameters
 
 ### Changed
