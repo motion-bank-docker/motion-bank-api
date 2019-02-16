@@ -40,7 +40,7 @@ class Profiles extends TinyEmitter {
       const data = req.body
       let results
       try {
-        results = await this.client.find({ user: req.params.id }, req.params)
+        results = await this.client.find({ user: req.params.id })
       }
       catch (err) {
         api.captureException(err)
@@ -48,7 +48,7 @@ class Profiles extends TinyEmitter {
       }
       if (results.length) {
         data.uuid = results[0].uuid
-        results = await this.client.update(data.uuid, data, req.params)
+        results = await this.client.update(data.uuid, data)
         return _this._response(req, res, results)
       }
       send(res, 404)
@@ -57,7 +57,7 @@ class Profiles extends TinyEmitter {
     api.app.patch('/profiles/:id', async (req, res) => {
       let results
       try {
-        results = await this.client.find({user: req.params.id}, req.params)
+        results = await this.client.find({user: req.params.id})
       }
       catch (err) {
         api.captureException(err)
@@ -73,7 +73,7 @@ class Profiles extends TinyEmitter {
       if (results.length) {
         results = ObjectUtil.merge(results[0], copy)
         try {
-          await this.client.update(results.uuid, results, req.params)
+          await this.client.update(results.uuid, results)
         }
         catch (err) {
           api.captureException(err)
@@ -87,7 +87,7 @@ class Profiles extends TinyEmitter {
     api.app.delete('/profiles/:id', async (req, res) => {
       let results
       try {
-        results = await this.client.find({user: req.params.id}, req.params)
+        results = await this.client.find({user: req.params.id})
       }
       catch (err) {
         api.captureException(err)
@@ -95,7 +95,7 @@ class Profiles extends TinyEmitter {
       }
       if (results.length) {
         try {
-          results = await this.client.remove(results[0].uuid, req.params)
+          results = await this.client.remove(results[0].uuid)
         }
         catch (err) {
           api.captureException(err)
@@ -112,7 +112,7 @@ class Profiles extends TinyEmitter {
   async getHandler (req, res) {
     let results
     try {
-      results = await this._client.find({user: req.params.id}, req.params)
+      results = await this._client.find({user: req.params.id})
     }
     catch (err) {
       this._api.captureException(err)

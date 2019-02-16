@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Find & get methods now accept a query parameter 'select' as a JSON encoded array specifiying fields to select for results
 - Find methods now detect and parse regular expressions in JSON-encoded query parameter
 - Allow setting ACL through URL query parameters
 
@@ -16,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Author middleware and base Service class now in [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
 - Author middleware now retrieves profile via external HTTP request
+- Updated [mbjs-persistence](https://gitlab.rlp.net/motionbank/mbjs/persistence) to version 1.0.0
+- Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api) to version 0.8.1
 
 ### Fixed
 
