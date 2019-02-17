@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes.
+
+## [1.2.0] - 2019-02-17
+
 ### Added
 
 - Find & get methods now accept a query parameter 'select' as a JSON encoded array specifiying fields to select for results
@@ -46,5 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...master
+[1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.2.0
 [1.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.1.0
 [1.0.0]: https://gitlab.rlp.net/motionbank/api/compare/initial...v1.0.0
