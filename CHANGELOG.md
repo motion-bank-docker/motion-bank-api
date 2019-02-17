@@ -50,6 +50,6 @@ No changes.
 
 
 [Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...master
-[1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.2.0
+[1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...v1.2.0
 [1.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.1.0
 [1.0.0]: https://gitlab.rlp.net/motionbank/api/compare/initial...v1.0.0
