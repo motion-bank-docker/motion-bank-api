@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 No changes.
 
+## [1.2.3] - 2019-03-03
+
+### Changed
+
+- Updated [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
+to 0.1.2 ([release_0_1](https://gitlab.rlp.net/motionbank/mbjs/data-models/commits/release_0_1)
+branch)
+
 ## [1.2.2] - 2019-02-21
 
 ### Changed
