@@ -7,17 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes yet.
+
+
+## [1.2.3] - 2019-03-03
+
 ### Changed
 
 - Updated [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
 to 0.1.2 ([release_0_1](https://gitlab.rlp.net/motionbank/mbjs/data-models/commits/release_0_1)
 branch)
+- Updated docker image node version to 10
+
 
 ## [1.2.2] - 2019-02-21
 
 ### Changed
 
 - Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api) to version 0.8.4
+
 
 ## [1.2.0] - 2019-02-17
 
@@ -42,11 +50,13 @@ branch)
 
 - Project specific script `bin/digitanz-fix.js`
 
+
 ## [1.1.0] - 2019-01-23
 
 ### Added
 
 - Now serves [Document](https://gitlab.rlp.net/motionbank/mbjs/data-models/tree/master/src/models/document) resources
+
 
 ## [1.0.0] - 2018-12-04
 
