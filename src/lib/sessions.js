@@ -29,7 +29,7 @@ const resurrectAnnotation = function (annotation) {
 const fetchMetaData = async (videos, req, api) => {
   for (let v of videos) {
     try {
-      const meta = await axios.get(`${config.api.transcoderHost}/metadata/${v.annotation.uuid}`, {
+      const meta = await axios.get(`${config.api.transcoderHost}/metadata/${v.annotation._uuid}`, {
         headers: {
           Authorization: req.headers.authorization
         }
@@ -107,7 +107,7 @@ class Sessions extends TinyEmitter {
       results = await _this._annotations.findHandler({
         query: {
           query: JSON.stringify({
-            'target.id': `${config.api.uriBase}/piecemaker/timelines/${map.uuid}`
+            'target.id': `${config.api.uriBase}/piecemaker/timelines/${map._uuid}`
           })
         },
         user: req.user,
@@ -120,7 +120,7 @@ class Sessions extends TinyEmitter {
   }
 
   _response (req, res, data = {}) {
-    this.emit('message', { method: req.method, id: data.uuid })
+    this.emit('message', { method: req.method, id: data.id })
     if (typeof res === 'function') res({ data })
     else if (typeof res === 'undefined') return Promise.resolve({ data })
     else send(res, 200, data)

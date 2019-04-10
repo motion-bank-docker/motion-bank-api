@@ -125,7 +125,7 @@ class Profiles extends TinyEmitter {
   }
 
   _response (req, res, data = {}) {
-    this.emit('message', { method: req.method, id: data.uuid })
+    this.emit('message', { method: req.method, id: data.id })
     if (typeof res === 'function') res({ data })
     else if (typeof res === 'undefined') return Promise.resolve({ data })
     else send(res, 200, data)
