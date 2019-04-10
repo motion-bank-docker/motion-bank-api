@@ -41,7 +41,7 @@ const fetchMetaData = async (videos, req, api) => {
   return videos
 }
 
-const groupBySessions = async function (annotations, req, api, secondsDist = constants.SESSION_DISTANCE_SECONDS) {
+const groupBySessions = async function (annotations, req, api, secondsDist = constants.config.SESSION_DISTANCE_SECONDS) {
   let millisDist = secondsDist * 1000
   annotations = annotations.map(annotation => resurrectAnnotation(annotation)).sort(Sorting.sortOnTarget)
   const videos = annotations.filter(anno => { return anno.body.type === 'Video' })
