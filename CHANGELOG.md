@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
 to 1.2.1
 - Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
-to 1.0.0
+to 1.1.0
 
 
 ## [1.2.3] - 2019-03-03
