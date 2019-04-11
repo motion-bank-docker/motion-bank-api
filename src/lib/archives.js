@@ -9,9 +9,10 @@ const
   send = require('@polka/send-type'),
   config = require('config'),
   Minio = require('minio'),
-  { Assert, ObjectUtil } = require('mbjs-utils')
+  { Assert, ObjectUtil } = require('mbjs-utils'),
+  parseURI = require('mbjs-data-models/src/lib/parse-uri')
 
-module.exports.setupArchives = (api, mapService, annotationService) => {
+module.exports.setupArchives = (api, mapService, annotationService, cellService) => {
   const upload = multer({ dest: os.tmpdir() })
   api.app.post('/archives/maps', async (req, res) => {
     let data = {}
@@ -33,6 +34,19 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       await annotationService.findHandler(request, async result => {
         if (result.error) return send(res, result.code)
         data.annotations = result.data.items
+        data.cells = []
+        for (let annotation of data.annotations) {
+          if (annotation.body.type === 'Cell' && annotation.body.source) {
+            const cellRequest = {
+              query: {
+                uuid: parseURI(annotation.body.source.id).uuid
+              },
+              user: req.user
+            }
+            const cell = await cellService.getHandler(cellRequest)
+            if (cell) data.cells.push(cell)
+          }
+        }
         const url = await exports.createArchive(api, data)
         send(res, 200, url)
       })
