@@ -107,7 +107,7 @@ class Sessions extends TinyEmitter {
       results = await _this._annotations.findHandler({
         query: {
           query: JSON.stringify({
-            'target.id': `${config.api.uriBase}/piecemaker/timelines/${map._uuid}`
+            'target.id': `${config.api.uriPrefix}piecemaker/timelines/${map._uuid}`
           })
         },
         user: req.user,
