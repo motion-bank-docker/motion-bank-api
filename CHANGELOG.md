@@ -14,6 +14,10 @@ to 1.2.1
 - Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
 to 1.1.1
 
+### Changed
+
+- Uses api.uriPrefix in config (adds trailing slash over api.uriBase)
+
 
 ## [1.2.3] - 2019-03-03
 
