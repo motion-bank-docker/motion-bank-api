@@ -30,6 +30,9 @@ const setup = async function () {
   const maps = new Service('maps', api, models.Map)
   // maps.on('message', message => api._sockets.write(message))
 
+  const cells = new Service('cells', api, models.Cell)
+  // cells.on('message', message => api._sockets.write(message))
+
   const documents = new Service('documents', api, models.Document)
   // documents.on('message', message => api._sockets.write(message))
 
@@ -47,7 +50,7 @@ const setup = async function () {
    */
 
   const archives = require('./lib/archives')
-  archives.setupArchives(api, maps, annotations)
+  archives.setupArchives(api, maps, annotations, cells)
 
   await api.start()
 }

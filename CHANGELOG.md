@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-No changes yet.
+### Updated
+
+- Updated [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
+to 1.2.4
+- Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+to 1.1.3
+
+### Changed
+
+- Uses api.uriPrefix in config (adds trailing slash over api.uriBase)
 
 
 ## [1.2.3] - 2019-03-03

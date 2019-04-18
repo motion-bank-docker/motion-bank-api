@@ -9,15 +9,16 @@ const
   send = require('@polka/send-type'),
   config = require('config'),
   Minio = require('minio'),
-  { Assert, ObjectUtil } = require('mbjs-utils')
+  { Assert, ObjectUtil } = require('mbjs-utils'),
+  parseURI = require('mbjs-data-models/src/lib/parse-uri')
 
-module.exports.setupArchives = (api, mapService, annotationService) => {
+module.exports.setupArchives = (api, mapService, annotationService, cellService) => {
   const upload = multer({ dest: os.tmpdir() })
   api.app.post('/archives/maps', async (req, res) => {
     let data = {}
     let request = {
       params: {
-        id: req.body.id
+        uuid: req.body.uuid
       },
       user: req.user
     }
@@ -26,13 +27,26 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       data.map = result.data
       request = {
         query: {
-          query: JSON.stringify({'target.id': `${config.api.uriBase}/maps/${data.map.uuid}`})
+          query: JSON.stringify({'target.id': data.map.id})
         },
         user: req.user
       }
       await annotationService.findHandler(request, async result => {
         if (result.error) return send(res, result.code)
         data.annotations = result.data.items
+        data.cells = []
+        for (let annotation of data.annotations) {
+          if (annotation.body.type === 'Cell' && annotation.body.source) {
+            const cellRequest = {
+              query: {
+                uuid: parseURI(annotation.body.source.id).uuid
+              },
+              user: req.user
+            }
+            const cell = await cellService.getHandler(cellRequest)
+            if (cell) data.cells.push(cell)
+          }
+        }
         const url = await exports.createArchive(api, data)
         send(res, 200, url)
       })
@@ -46,7 +60,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       if (results.maps && !copy) {
         for (let map of results.maps) {
           const getRequest = {
-            params: { id: map.uuid },
+            params: { uuid: map._uuid },
             user: req.user
           }
           const item = await mapService.getHandler(getRequest)
@@ -56,7 +70,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
       if (results.annotations && !copy) {
         for (let annotation of results.annotations) {
           const getRequest = {
-            params: { id: annotation.uuid },
+            params: { uuid: annotation._uuid },
             user: req.user
           }
           const item = await annotationService.getHandler(getRequest)
@@ -68,13 +82,14 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
         const mappings = {}
         if (results.maps) {
           for (let map of results.maps) {
-            let oldId = map.uuid
+            let oldId = map._uuid
             for (let k of Object.keys(map)) {
               if (k[0] === '_') map[k] = undefined
             }
             if (copy) {
               map.title = req.body.title
-              map.uuid = undefined
+              map.id = undefined
+              map._uuid = undefined
             }
             if (!map.author) {
               map.author = {
@@ -87,7 +102,7 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
               user: req.user
             }
             const result = await mapService.postHandler(postRequest)
-            if (copy) mappings[oldId] = result.data.uuid
+            if (copy) mappings[oldId] = result.data._uuid
           }
         }
         if (results.annotations) {
@@ -97,7 +112,8 @@ module.exports.setupArchives = (api, mapService, annotationService) => {
             }
             if (copy) {
               annotation.target.id = mappings[annotation.target.id]
-              annotation.uuid = undefined
+              annotation._uuid = undefined
+              annotation.id = undefined
             }
             if (!annotation.author) {
               annotation.author = {
@@ -122,7 +138,7 @@ module.exports.createArchive = async (api, data) => {
   Assert.isType(data.map, 'object', 'data.map must be object')
   Assert.ok(Array.isArray(data.annotations), 'data.annotations must be array')
 
-  const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map.uuid}`)
+  const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map._uuid}`)
 
   await new Promise((resolve, reject) => {
     rimraf(dir, err => {
@@ -140,12 +156,12 @@ module.exports.createArchive = async (api, data) => {
   await fs.mkdir(path.join(dir, 'maps'))
   await fs.mkdir(path.join(dir, 'annotations'))
 
-  const mapfile = path.join('maps', `${data.map.uuid}.json`)
+  const mapfile = path.join('maps', `${data.map._uuid}.json`)
   await fs.writeFile(path.join(dir, mapfile), JSON.stringify(data.map))
   archive.addFile(path.join(dir, mapfile), mapfile)
 
   for (let a of data.annotations) {
-    const annofile = path.join('annotations', `${a.uuid}.json`)
+    const annofile = path.join('annotations', `${a._uuid}.json`)
     await fs.writeFile(path.join(dir, annofile), JSON.stringify(a))
     archive.addFile(path.join(dir, annofile), annofile)
   }
