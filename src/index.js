@@ -6,10 +6,6 @@ const setup = async function () {
   const api = new GenericAPI()
   await api.setup()
 
-  const
-    Services = require('./lib/services'),
-    services = new Services(api)
-
   /**
    * Configure Profiles
    */
