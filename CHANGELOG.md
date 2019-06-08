@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [cote](https://github.com/dashersw/cote) Sockend over [socket.io](https://socket.io/) to connect frontends
+with microservices
 - Basic [Pina Bausch Archive (PBA)](http://www.pinabausch.org) proxy endpoints for pieces and titles
 
 ### Updated
