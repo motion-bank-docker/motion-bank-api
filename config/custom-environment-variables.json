@@ -31,7 +31,8 @@
     "mongodb": {
       "url": "MONGODB_ACL_URL",
       "dbName": "MONGODB_ACL_DBNAME"
-    }
+    },
+    "defaultRole": "ACL_DEFAULT_ROLE"
   },
   "profiles": {
     "mongodb": {

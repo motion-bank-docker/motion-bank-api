@@ -32,7 +32,8 @@
     "mongodb": {
       "url": "mongodb://localhost:27017",
       "dbName": "motionbank-api-acl"
-    }
+    },
+    "defaultRole": null
   },
   "profiles": {
     "mongodb": {
