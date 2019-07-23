@@ -63,5 +63,15 @@
       "username": "PBA_USERNAME",
       "password": "PBA_PASSWORD"
     }
+  },
+  "microservices": {
+    "acl": {
+      "key": "MICROSERVICES_ACL_KEY",
+      "namespace": "MICROSERVICES_ACL_NAMESPACE"
+    },
+    "metadata": {
+      "key": "MICROSERVICES_METADATA_KEY",
+      "namespace": "MICROSERVICES_METADATA_NAMESPACE"
+    }
   }
 }
