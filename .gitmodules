@@ -1,0 +1,3 @@
+[submodule ".docker-lib"]
+	path = .docker-lib
+	url = git@gitlab.rlp.net:motionbank/tools/docker-lib.git
