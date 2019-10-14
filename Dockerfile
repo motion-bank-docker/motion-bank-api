@@ -11,4 +11,5 @@ RUN rm -rf node_modules
 RUN npm install --production
 
 EXPOSE 3030
-ENTRYPOINT ["entrypoint.sh", "node", "src"]
+# ENTRYPOINT ["entrypoint.sh", "node", "src"]
+ENTRYPOINT ["node", "src"]
