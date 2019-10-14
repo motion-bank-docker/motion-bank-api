@@ -1,10 +1,14 @@
 FROM node:10
 MAINTAINER Motion Bank
 
+COPY .docker-lib/scripts/entrypoint.sh /usr/local/bin/
+COPY .docker-lib/scripts/env_secrets_expand.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh
+
 WORKDIR /app
 COPY . .
 RUN rm -rf node_modules
 RUN npm install --production
 
 EXPOSE 3030
-CMD ["node", "src"]
+ENTRYPOINT ["entrypoint.sh", "node", "src"]
