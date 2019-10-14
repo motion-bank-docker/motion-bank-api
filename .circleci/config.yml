@@ -1,0 +1,107 @@
+aliases:
+  - &pull-submodules
+    name: Pull Submodules
+    command: |
+      ssh-keyscan gitlab.rlp.net >> ~/.ssh/known_hosts
+      git submodule init
+      git submodule update
+  - &install-dependencies
+    name: Install dependencies
+    command: |
+      apk add --update --no-cache nodejs nodejs-npm python make g++ pkgconfig libsecret-dev
+      npm config set unsafe-perm true
+      npm i -g npm
+      node --version
+      npm --version
+      npm i -g @quasar/cli
+      npm install
+
+version: 2
+jobs:
+  release_dev:
+    working_directory: /app
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - run: *pull-submodules
+      - setup_remote_docker
+      - run: *install-dependencies
+      - run:
+          name: Release Dev Image
+          environment:
+            IS_STAGING: true
+            API_HOST: https://api-dev.motionbank.org
+          command: |
+            set +o pipefail
+            AUTH0_CLIENT_ID=${DEV_AUTH0_CLIENT_ID} SENTRY_DSN=${DEV_SENTRY_DSN} npm run build
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker build --no-cache -t motionbank/systems-frontend:dev .
+            docker push motionbank/systems-frontend:dev
+
+  release_production:
+    working_directory: /app
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - run: *pull-submodules
+      - setup_remote_docker
+      - run: *install-dependencies
+      - run:
+          name: Release Production Image
+          command: |
+            set +o pipefail
+            AUTH0_CLIENT_ID=${PROD_AUTH0_CLIENT_ID} SENTRY_DSN=${PROD_SENTRY_DSN} npm run build
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker build --no-cache -t motionbank/systems-frontend:${CIRCLE_BRANCH} .
+            docker push motionbank/systems-frontend:${CIRCLE_BRANCH}
+
+  release_staging:
+    working_directory: /app
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - run: *pull-submodules
+      - setup_remote_docker
+      - run: *install-dependencies
+      - run:
+          name: Release Staging Image
+          environment:
+            IS_STAGING: true
+            API_HOST: https://api-staging.motionbank.org
+          command: |
+            set +o pipefail
+            AUTH0_CLIENT_ID=${STAGING_AUTH0_CLIENT_ID} SENTRY_DSN=${STAGING_SENTRY_DSN} npm run build
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker build --no-cache -t motionbank/systems-frontend:staging .
+            docker push motionbank/systems-frontend:staging
+
+workflows:
+  version: 2
+  build_pipeline:
+    jobs:
+      - release_dev:
+          filters:
+            branches:
+              only: master
+      - release_staging:
+          filters:
+            branches:
+              only: staging
+      - release_production:
+          filters:
+            branches:
+              only: /^release_.+$/
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 1 * * 1"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - release_dev
+      - release_staging
