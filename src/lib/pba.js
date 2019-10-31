@@ -15,18 +15,22 @@ class PBA extends TinyEmitter {
   }
 
   async _performRequest (path) {
-    const result = await axios.get(`${config.pba.baseUrl}/${path}`, { auth: config.pba.credentials })
-    return result.data
+    if (config.pba.baseUrl) {
+      const result = await axios.get(`${config.pba.baseUrl}/${path}`, { auth: config.pba.credentials })
+      return result.data
+    }
   }
 
   async getPiecesHandler (req, res) {
     const result = await this._performRequest('pieces')
-    this._response(req, res, result.pieces)
+    if (result) this._response(req, res, result.pieces)
+    else this._errorResponse({}, 503, 'PBA vocabularies not available')
   }
 
   async getTitlesForPieceHandler (req, res) {
     const result = await this._performRequest(`titles/${req.params.piece_id}`)
-    this._response(req, res, result.titles)
+    if (result) this._response(req, res, result.titles)
+    else this._errorResponse({}, 503, 'PBA vocabularies not available')
   }
 
   _response (req, res, data = {}) {
