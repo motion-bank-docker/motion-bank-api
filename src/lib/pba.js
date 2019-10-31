@@ -24,13 +24,13 @@ class PBA extends TinyEmitter {
   async getPiecesHandler (req, res) {
     const result = await this._performRequest('pieces')
     if (result) this._response(req, res, result.pieces)
-    else this._errorResponse({}, 503, 'PBA vocabularies not available')
+    else this._errorResponse(res, 503, 'PBA vocabularies not available')
   }
 
   async getTitlesForPieceHandler (req, res) {
     const result = await this._performRequest(`titles/${req.params.piece_id}`)
     if (result) this._response(req, res, result.titles)
-    else this._errorResponse({}, 503, 'PBA vocabularies not available')
+    else this._errorResponse(res, 503, 'PBA vocabularies not available')
   }
 
   _response (req, res, data = {}) {
