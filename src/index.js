@@ -14,8 +14,8 @@ const setup = async function () {
     profiles = new Profiles(api)
   // profiles.on('message', message => api._logger.debug(message))
 
-  const addAuthor = require('mbjs-generic-api/src/middleware/author')
-  addAuthor(api, config)
+  const addCreator = require('mbjs-generic-api/src/middleware/creator')
+  addCreator(api, config)
 
   /**
    * Configure resources

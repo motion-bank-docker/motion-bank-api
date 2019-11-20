@@ -91,8 +91,8 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
               map.id = undefined
               map._uuid = undefined
             }
-            if (!map.author) {
-              map.author = {
+            if (!map.creator) {
+              map.creator = {
                 id: req.user.uuid,
                 name: req.user.profile.name
               }
@@ -115,8 +115,8 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
               annotation._uuid = undefined
               annotation.id = undefined
             }
-            if (!annotation.author) {
-              annotation.author = {
+            if (!annotation.creator) {
+              annotation.creator = {
                 id: req.user.uuid,
                 name: req.user.profile.name
               }
