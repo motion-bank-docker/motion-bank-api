@@ -49,7 +49,7 @@
     "luxon": "^1.3.3",
     "mbjs-data-models": "1.3.1",
     "mbjs-generic-api": "1.3.3",
-    "mbjs-persistence": "1.1.1",
+    "mbjs-persistence": "1.1.3",
     "mbjs-utils": "0.0.6",
     "minio": "^7.0.1",
     "mongodb": "^3.1.1",
