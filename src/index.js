@@ -36,6 +36,9 @@ const setup = async function () {
   const documents = new Service('documents', api, models.Document)
   // documents.on('message', message => api._sockets.write(message))
 
+  const components = new Service('components', api, models.Component)
+  // components.on('message', message => api._sockets.write(message))
+
   /**
    * Configure sessions
    */
