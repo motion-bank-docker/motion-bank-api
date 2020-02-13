@@ -57,13 +57,6 @@
       "audience": "AUTH0_AUDIENCE"
     }
   },
-  "pba": {
-    "baseUrl": "PBA_BASE_URL",
-    "credentials": {
-      "username": "PBA_USERNAME",
-      "password": "PBA_PASSWORD"
-    }
-  },
   "microservices": {
     "acl": {
       "key": "MICROSERVICES_ACL_KEY",

@@ -68,13 +68,6 @@
     "youtube": null,
     "vimeo": null
   },
-  "pba": {
-    "baseUrl": null,
-    "credentials": {
-      "username": null,
-      "password": null
-    }
-  },
   "microservices": {
     "acl": {
       "key": "acl",

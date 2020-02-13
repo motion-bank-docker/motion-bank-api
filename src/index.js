@@ -55,14 +55,6 @@ const setup = async function () {
   const archives = require('./lib/archives')
   archives.setupArchives(api, maps, annotations, cells)
 
-  /**
-   * Configure PBA
-   */
-
-  const
-    PBA = require('./lib/pba'),
-    pba = new PBA(api)
-
   await api.start()
 }
 
