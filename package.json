@@ -13,7 +13,7 @@
     "lint": "eslint src/. --config .eslintrc.js",
     "metapak": "metapak",
     "start": "node src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No test specified\" && exit 0"
   },
   "repository": {
     "type": "git",
