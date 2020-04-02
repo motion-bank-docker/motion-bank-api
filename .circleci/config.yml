@@ -49,8 +49,8 @@ jobs:
           command: |
             set +o pipefail
             docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-            docker build --no-cache -t motionbank/systems-frontend:${CIRCLE_BRANCH} .
-            docker push motionbank/systems-frontend:${CIRCLE_BRANCH}
+            docker build --no-cache -t motionbank/api:${CIRCLE_BRANCH} .
+            docker push motionbank/api:${CIRCLE_BRANCH}
 
   release_legacy:
     working_directory: /app
@@ -66,8 +66,8 @@ jobs:
           command: |
             set +o pipefail
             docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-            docker build --no-cache -t motionbank/systems-frontend:${CIRCLE_BRANCH} .
-            docker push motionbank/systems-frontend:${CIRCLE_BRANCH}
+            docker build --no-cache -t motionbank/api:${CIRCLE_BRANCH} .
+            docker push motionbank/api:${CIRCLE_BRANCH}
 
 workflows:
   version: 2
