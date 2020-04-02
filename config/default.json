@@ -62,6 +62,13 @@
       "issuer": "https://auth.motionbank.org/",
       "algorithms": ["RS256"],
       "credentialsRequired": false
+    },
+    "admin": {
+      "apiEndpoint": null,
+      "tokenEndpoint": null,
+      "clientId": null,
+      "clientSecret": null,
+      "audience": null
     }
   },
   "apiKeys": {

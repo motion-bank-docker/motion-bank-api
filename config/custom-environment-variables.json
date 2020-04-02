@@ -55,6 +55,13 @@
   "auth": {
     "jwt": {
       "audience": "AUTH0_AUDIENCE"
+    },
+    "admin": {
+      "apiEndpoint": "ADMIN_API_ENDPOINT",
+      "tokenEndpoint": "ADMIN_TOKEN_ENDPOINT",
+      "clientId": "ADMIN_CLIENT_ID",
+      "clientSecret": "ADMIN_CLIENT_SECRET",
+      "audience": "ADMIN_AUDIENCE"
     }
   },
   "microservices": {

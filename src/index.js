@@ -39,6 +39,9 @@ const setup = async function () {
   const components = new Service('components', api, models.Component)
   // components.on('message', message => api._sockets.write(message))
 
+  const Manage = require('./lib/manage')
+  const manage = new Manage(api)
+
   /**
    * Configure sessions
    */
