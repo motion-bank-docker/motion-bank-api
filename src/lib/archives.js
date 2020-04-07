@@ -17,6 +17,11 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
   api.app.post('/archives/maps/:uuid', async (req, res) => {
     let result, data = {}
 
+    const cleanObject = obj => {
+      if (obj._id) delete obj._id
+      return obj
+    }
+
     const conf = {
       params: { uuid: req.params.uuid },
       headers: req.headers,
@@ -34,7 +39,7 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
       user: req.user
     })
     if (result.error) return send(res, result.error.code || 500)
-    data.annotations = result.data.items
+    data.annotations = result.data.items.map(item => cleanObject(item))
 
     for (let annotation of data.annotations) {
       if (annotation.body.type === `${constants.BASE_URI_NS}cell.jsonld`) continue
@@ -46,7 +51,9 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
         headers: req.headers,
         user: req.user
       })
-      if (!result.error && Array.isArray(result.data)) data.annotations = data.annotations.concat(result.data)
+      if (!result.error && Array.isArray(result.data.items)) {
+        data.annotations = data.annotations.concat(result.data.items.map(item => cleanObject(item)))
+      }
       else if (result.error && result.error.code !== 404) return send(res, result.error.code || 500)
     }
 
@@ -56,12 +63,14 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
 
       result = await cellService.findHandler({
         query: {
-          query: { uuid: parseURI(annotation.body.source.id).uuid }
+          query: JSON.stringify({ id: annotation.body.source.id })
         },
         headers: req.headers,
         user: req.user
       })
-      if (!result.error) data.cells = data.cells.concat(result.data.items)
+      if (!result.error && Array.isArray(result.data.items)) {
+        data.cells = data.cells.concat(result.data.items.map(item => cleanObject(item)))
+      }
     }
 
     const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.maps[0].title)}_${data.maps[0]._uuid}`)
@@ -83,6 +92,7 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
     upload.single('file')(req, res, async () => {
       let idMappings
       const results = await archive.read(req.file.path)
+      const overrideAuthor = typeof req.body.overrideAuthor === 'string' ? JSON.parse(req.body.overrideAuthor) : req.body.author
 
       const createMappings = (items, idMappings = {}) => {
         if (Array.isArray(items)) {
@@ -116,7 +126,7 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
       const importItems = async function (items, service, idMappings = undefined) {
         for (let item of items) {
           if (idMappings) item = applyMappings(item, idMappings)
-          if (req.body.overrideAuthor) item.creator = { id: req.user.id, name: req.user.profile.name }
+          if (overrideAuthor) item.creator = { id: req.user.id, name: req.user.profile.name }
           const getRequest = {
             params: { uuid: parseURI(item.id).uuid },
             headers: req.headers,
