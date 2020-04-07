@@ -1,227 +1,151 @@
 const
-  yazl = require('yazl'),
-  yauzl = require('yauzl'),
   path = require('path'),
   fs = require('mz/fs'),
-  rimraf = require('rimraf'),
   os = require('os'),
   multer = require('multer'),
   send = require('@polka/send-type'),
   config = require('config'),
   Minio = require('minio'),
-  { Assert, ObjectUtil } = require('mbjs-utils'),
-  parseURI = require('mbjs-data-models/src/lib/parse-uri')
+  archive = require('mbjs-archive'),
+  { ObjectUtil, uuid } = require('mbjs-utils'),
+  parseURI = require('mbjs-data-models/src/lib/parse-uri'),
+  constants = require('mbjs-data-models/src/constants'),
+  { URL } = require('url')
 
 module.exports.setupArchives = (api, mapService, annotationService, cellService) => {
   const upload = multer({ dest: os.tmpdir() })
-  api.app.post('/archives/maps', async (req, res) => {
-    let data = {}
-    let request = {
-      params: {
-        uuid: req.body.uuid
-      },
+  api.app.post('/archives/maps/:uuid', async (req, res) => {
+    let result, data = {}
+
+    const conf = {
+      params: { uuid: req.params.uuid },
+      headers: req.headers,
       user: req.user
     }
-    await mapService.getHandler(request, async result => {
-      if (result.error) return send(res, result.code)
-      data.map = result.data
-      request = {
+    result = await mapService.getHandler(conf)
+    if (result.error) return send(res, result.error.code || 500)
+    else data.maps = [result.data]
+
+    result = await annotationService.findHandler({
+      query: {
+        query: JSON.stringify({'target.id': data.maps[0].id})
+      },
+      headers: req.headers,
+      user: req.user
+    })
+    if (result.error) return send(res, result.error.code || 500)
+    data.annotations = result.data.items
+
+    for (let annotation of data.annotations) {
+      if (annotation.body.type === `${constants.BASE_URI_NS}cell.jsonld`) continue
+
+      result = await cellService.findHandler({
         query: {
-          query: JSON.stringify({'target.id': data.map.id})
+          query: JSON.stringify({'target.id': annotation.id})
         },
+        headers: req.headers,
         user: req.user
-      }
-      await annotationService.findHandler(request, async result => {
-        if (result.error) return send(res, result.code)
-        data.annotations = result.data.items
-        data.cells = []
-        for (let annotation of data.annotations) {
-          if (annotation.body.type === 'Cell' && annotation.body.source) {
-            const cellRequest = {
-              query: {
-                uuid: parseURI(annotation.body.source.id).uuid
-              },
-              user: req.user
-            }
-            const cell = await cellService.getHandler(cellRequest)
-            if (cell) data.cells.push(cell)
-          }
-        }
-        const url = await exports.createArchive(api, data)
-        send(res, 200, url)
       })
-    })
+      if (!result.error && Array.isArray(result.data)) data.annotations = data.annotations.concat(result.data)
+      else if (result.error && result.error.code !== 404) return send(res, result.error.code || 500)
+    }
+
+    data.cells = []
+    for (let annotation of data.annotations) {
+      if (annotation.body.type !== `${constants.BASE_URI_NS}cell.jsonld`) continue
+
+      result = await cellService.findHandler({
+        query: {
+          query: { uuid: parseURI(annotation.body.source.id).uuid }
+        },
+        headers: req.headers,
+        user: req.user
+      })
+      if (!result.error) data.cells = data.cells.concat(result.data.items)
+    }
+
+    const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.maps[0].title)}_${data.maps[0]._uuid}`)
+    const archivePath = `${dir}.zip`
+
+    await archive.write(archivePath, data)
+
+    const opts = Object.assign({}, config.assets.client)
+    opts.useSSL = config.assets.client.useSSL && (config.assets.client.useSSL === true || config.assets.client.useSSL === 'true')
+    opts.port = config.assets.client.port ? parseInt(config.assets.client.port) : undefined
+    const minioClient = new Minio.Client(opts)
+    await minioClient.fPutObject(config.assets.archivesBucket, path.basename(archivePath), archivePath, { 'Content-Type': 'application/zip' })
+    await fs.unlink(archivePath)
+    const url = await minioClient.presignedGetObject(config.assets.archivesBucket, path.basename(archivePath))
+
+    send(res, 200, url)
   })
-  api.app.post('/archives/maps/upload', async function (req, res) {
+  api.app.post('/archives/maps', async function (req, res) {
     upload.single('file')(req, res, async () => {
-      const results = await exports.readArchive(req.file.path)
-      const copy = req.body.title || false
-      let hasDuplicates = false
-      if (results.maps && !copy) {
+      const results = await archive.read(req.file.path)
+
+      if (req.body.title) {
         for (let map of results.maps) {
+          map.title = req.body.title
+        }
+      }
+
+      const importItems = async function (items, service, idMappings = undefined) {
+        for (let item of items) {
+          if (idMappings) item = applyMappings(item, idMappings)
+          if (req.body.overrideAuthor) item.creator = { id: req.user.id, name: req.user.profile.name }
           const getRequest = {
-            params: { uuid: map._uuid },
+            params: { uuid: parseURI(item.id).uuid },
+            headers: req.headers,
             user: req.user
           }
-          const item = await mapService.getHandler(getRequest)
-          if (!item.error) hasDuplicates = true
-        }
-      }
-      if (results.annotations && !copy) {
-        for (let annotation of results.annotations) {
-          const getRequest = {
-            params: { uuid: annotation._uuid },
+          const result = await service.getHandler(getRequest)
+          const request = {
+            params: { uuid: parseURI(item.id).uuid },
+            headers: req.headers,
+            body: item,
             user: req.user
           }
-          const item = await annotationService.getHandler(getRequest)
-          if (!item.error) hasDuplicates = true
-        }
-      }
-      if (hasDuplicates) send(res, 400, { message: 'errors.has_duplicates' })
-      else {
-        const mappings = {}
-        if (results.maps) {
-          for (let map of results.maps) {
-            let oldId = map._uuid
-            for (let k of Object.keys(map)) {
-              if (k[0] === '_') map[k] = undefined
+          if (result.error) {
+            if (result.code === 404) {
+              await service.postHandler(request)
             }
-            if (copy) {
-              map.title = req.body.title
-              map.id = undefined
-              map._uuid = undefined
-            }
-            if (!map.creator) {
-              map.creator = {
-                id: req.user.uuid,
-                name: req.user.profile.name
-              }
-            }
-            const postRequest = {
-              body: map,
-              user: req.user
-            }
-            const result = await mapService.postHandler(postRequest)
-            if (copy) mappings[oldId] = result.data._uuid
+            else return send(res, result.code || 500)
+          }
+          else {
+            await service.putHandler(request)
           }
         }
-        if (results.annotations) {
-          for (let annotation of results.annotations) {
-            for (let k of Object.keys(annotation)) {
-              if (k[0] === '_') annotation[k] = undefined
-            }
-            if (copy) {
-              annotation.target.id = mappings[annotation.target.id]
-              annotation._uuid = undefined
-              annotation.id = undefined
-            }
-            if (!annotation.creator) {
-              annotation.creator = {
-                id: req.user.uuid,
-                name: req.user.profile.name
-              }
-            }
-            const postRequest = {
-              body: annotation,
-              user: req.user
-            }
-            await annotationService.postHandler(postRequest)
+      }
+
+      const applyMappings = (item, idMappings) => {
+        let str = JSON.stringify(item)
+        const ids = Object.keys(idMappings)
+        for (let id of ids) {
+          const escaped = id.replace(/\./g, '\\.').replace(/\//g, '\\/')
+          str = str.replace(new RegExp(escaped, 'g'), idMappings[id])
+        }
+        return JSON.parse(str)
+      }
+
+      const createMappings = (items, idMappings = {}) => {
+        if (Array.isArray(items)) {
+          for (let item of items) {
+            const parsed = new URL(item.id)
+            let [type] = parsed.pathname.substr(1).split('/')
+            idMappings[item.id] = `${parsed.protocol}//${parsed.host}/${type}/${uuid.v4()}`
           }
         }
-        send(res, 200)
+        return idMappings
       }
-    })
-  })
-}
+      let idMappings = createMappings(results.maps)
+      idMappings = createMappings(results.annotations, idMappings)
+      idMappings = createMappings(results.cells, idMappings)
 
-module.exports.createArchive = async (api, data) => {
-  Assert.isType(data.map, 'object', 'data.map must be object')
-  Assert.ok(Array.isArray(data.annotations), 'data.annotations must be array')
+      await importItems(results.maps, mapService, idMappings)
+      await importItems(results.annotations, annotationService, idMappings)
+      if (Array.isArray(results.cells)) await importItems(results.cells, cellService, idMappings)
 
-  const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.map.title)}_${data.map._uuid}`)
-
-  await new Promise((resolve, reject) => {
-    rimraf(dir, err => {
-      if (err) {
-        api.captureException(err)
-        return reject(err)
-      }
-      resolve()
-    })
-  })
-
-  const archive = new yazl.ZipFile()
-
-  await fs.mkdir(dir)
-  await fs.mkdir(path.join(dir, 'maps'))
-  await fs.mkdir(path.join(dir, 'annotations'))
-
-  const mapfile = path.join('maps', `${data.map._uuid}.json`)
-  await fs.writeFile(path.join(dir, mapfile), JSON.stringify(data.map))
-  archive.addFile(path.join(dir, mapfile), mapfile)
-
-  for (let a of data.annotations) {
-    const annofile = path.join('annotations', `${a._uuid}.json`)
-    await fs.writeFile(path.join(dir, annofile), JSON.stringify(a))
-    archive.addFile(path.join(dir, annofile), annofile)
-  }
-
-  archive.end()
-
-  const archivePath = `${dir}.zip`
-  await new Promise((resolve, reject) => {
-    archive.outputStream.pipe(fs.createWriteStream(archivePath))
-      .on('error', err => {
-        reject(err)
-      })
-      .on('close', () => {
-        resolve()
-      })
-  })
-
-  const opts = Object.assign({}, config.assets.client)
-  opts.useSSL = config.assets.client.useSSL && (config.assets.client.useSSL === true || config.assets.client.useSSL === 'true')
-  opts.port = config.assets.client.port ? parseInt(config.assets.client.port) : undefined
-  const minioClient = new Minio.Client(opts)
-  await minioClient.fPutObject(config.assets.archivesBucket, path.basename(archivePath), archivePath, { 'Content-Type': 'application/zip' })
-  await fs.unlink(archivePath)
-  const url = await minioClient.presignedGetObject(config.assets.archivesBucket, path.basename(archivePath))
-
-  return url
-}
-
-module.exports.readArchive = archivePath => {
-  const results = {}
-  const getFile = (entry, zipfile) => {
-    return new Promise((resolve, reject) => {
-      let data = ''
-      zipfile.openReadStream(entry, function (err, readStream) {
-        if (err) return reject(err)
-        readStream.on('data', chunk => {
-          data += chunk.toString()
-        })
-        readStream.on('end', () => resolve(data))
-        readStream.on('error', err => reject(err))
-      })
-    })
-  }
-  return new Promise((resolve, reject) => {
-    yauzl.open(archivePath, {lazyEntries: true}, async (err, zipfile) => {
-      if (err) return reject(err)
-      zipfile.readEntry()
-      zipfile.on('end', () => resolve(results))
-      zipfile.on('error', err => reject(err))
-      zipfile.on('entry', async entry => {
-        if (/\/$/.test(entry.fileName)) zipfile.readEntry()
-        else {
-          const type = path.dirname(entry.fileName)
-          const data = await getFile(entry, zipfile)
-          const obj = JSON.parse(data)
-          if (!results[type]) results[type] = []
-          results[type].push(obj)
-          zipfile.readEntry()
-        }
-      })
+      send(res, 200)
     })
   })
 }
