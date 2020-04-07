@@ -81,12 +81,36 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
   })
   api.app.post('/archives/maps', async function (req, res) {
     upload.single('file')(req, res, async () => {
+      let idMappings
       const results = await archive.read(req.file.path)
+
+      const createMappings = (items, idMappings = {}) => {
+        if (Array.isArray(items)) {
+          for (let item of items) {
+            const parsed = new URL(item.id)
+            let [type] = parsed.pathname.substr(1).split('/')
+            idMappings[item.id] = `${parsed.protocol}//${parsed.host}/${type}/${uuid.v4()}`
+          }
+        }
+        return idMappings
+      }
+      const applyMappings = (item, idMappings) => {
+        let str = JSON.stringify(item)
+        const ids = Object.keys(idMappings)
+        for (let id of ids) {
+          const escaped = id.replace(/\./g, '\\.').replace(/\//g, '\\/')
+          str = str.replace(new RegExp(escaped, 'g'), idMappings[id])
+        }
+        return JSON.parse(str)
+      }
 
       if (req.body.title) {
         for (let map of results.maps) {
           map.title = req.body.title
         }
+        idMappings = createMappings(results.maps)
+        idMappings = createMappings(results.annotations, idMappings)
+        idMappings = createMappings(results.cells, idMappings)
       }
 
       const importItems = async function (items, service, idMappings = undefined) {
@@ -116,30 +140,6 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
           }
         }
       }
-
-      const applyMappings = (item, idMappings) => {
-        let str = JSON.stringify(item)
-        const ids = Object.keys(idMappings)
-        for (let id of ids) {
-          const escaped = id.replace(/\./g, '\\.').replace(/\//g, '\\/')
-          str = str.replace(new RegExp(escaped, 'g'), idMappings[id])
-        }
-        return JSON.parse(str)
-      }
-
-      const createMappings = (items, idMappings = {}) => {
-        if (Array.isArray(items)) {
-          for (let item of items) {
-            const parsed = new URL(item.id)
-            let [type] = parsed.pathname.substr(1).split('/')
-            idMappings[item.id] = `${parsed.protocol}//${parsed.host}/${type}/${uuid.v4()}`
-          }
-        }
-        return idMappings
-      }
-      let idMappings = createMappings(results.maps)
-      idMappings = createMappings(results.annotations, idMappings)
-      idMappings = createMappings(results.cells, idMappings)
 
       await importItems(results.maps, mapService, idMappings)
       await importItems(results.annotations, annotationService, idMappings)
