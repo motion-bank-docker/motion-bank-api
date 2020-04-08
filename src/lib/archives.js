@@ -15,7 +15,7 @@ const
 module.exports.setupArchives = (api, mapService, annotationService, cellService) => {
   const upload = multer({ dest: os.tmpdir() })
   api.app.post('/archives/maps/:uuid', async (req, res) => {
-    let result, data = {}
+    let result, rootMap, data = {}
 
     const cleanObject = obj => {
       if (obj._id) delete obj._id
@@ -29,11 +29,14 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
     }
     result = await mapService.getHandler(conf)
     if (result.error) return send(res, result.error.code || 500)
-    else data.maps = [result.data]
+    else {
+      rootMap = result.data
+      data.maps = [rootMap]
+    }
 
     result = await annotationService.findHandler({
       query: {
-        query: JSON.stringify({'target.id': data.maps[0].id})
+        query: JSON.stringify({'target.id': rootMap.id})
       },
       headers: req.headers,
       user: req.user
@@ -73,7 +76,7 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
       }
     }
 
-    const dir = path.join(os.tmpdir(), `archive_${ObjectUtil.slug(data.maps[0].title)}_${data.maps[0]._uuid}`)
+    const dir = path.join(os.tmpdir(), `${rootMap.type}_${ObjectUtil.slug(rootMap.title)}_${rootMap._uuid}`)
     const archivePath = `${dir}.zip`
 
     await archive.write(archivePath, data)
