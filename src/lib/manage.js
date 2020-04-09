@@ -109,6 +109,9 @@ class Manage extends TinyEmitter {
     api.app.post('/manage', async (req, res) => {
       if (!isAdmin(req)) return send(res, 403)
 
+      req.body.creator = undefined
+      req.body.connection = _config.connection
+
       const headers = await getHeaders()
       try {
         const result = await axios.post(
@@ -118,7 +121,7 @@ class Manage extends TinyEmitter {
         send(res, 200, result.data)
       }
       catch (err) {
-        if (err.response) send(res, err.response.status)
+        if (err.response) send(res, err.response.status, err.response.data)
         else {
           console.error(`POST /manage/${req.params.id}`, err.message)
           send(res, 500)
