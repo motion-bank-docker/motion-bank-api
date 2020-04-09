@@ -61,7 +61,8 @@
       "tokenEndpoint": "ADMIN_TOKEN_ENDPOINT",
       "clientId": "ADMIN_CLIENT_ID",
       "clientSecret": "ADMIN_CLIENT_SECRET",
-      "audience": "ADMIN_AUDIENCE"
+      "audience": "ADMIN_AUDIENCE",
+      "connection": "ADMIN_CONNECTION"
     }
   },
   "microservices": {

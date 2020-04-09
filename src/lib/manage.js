@@ -56,6 +56,35 @@ class Manage extends TinyEmitter {
       return Array.isArray(req.user.profile.roles) && req.user.profile.roles.indexOf('admin') > -1
     }
 
+    api.app.get('/manage', async (req, res) => {
+      if (!req.user || !isAdmin(req)) {
+        return send(res, 403)
+      }
+
+      const headers = await getHeaders()
+      try {
+        let pagination = {}
+        const filter = req.query.filter
+        if (req.query.pagination) pagination = JSON.parse(req.query.pagination)
+        const query = {
+          page: pagination.page ? pagination.page - 1 : 0,
+          per_page: pagination.rowsPerPage || 10,
+          include_totals: true,
+          search_engine: 'v3',
+          q: filter ? `identities.connection:"${_config.connection}" AND email:${filter}*` : undefined,
+          sort: `${pagination.sortBy || 'email'}:${pagination.descending ? -1 : 1}`
+        }
+        const result = await axios.get(`${_config.apiEndpoint}users`, { headers, params: query })
+        send(res, 200, result.data)
+      }
+      catch (err) {
+        if (err.response) send(res, err.response.status)
+        else {
+          console.error(`GET /manage`, err.message)
+        }
+      }
+    })
+
     api.app.get('/manage/:id', async (req, res) => {
       if (!req.user || (!isAdmin(req) && req.params.id !== req.user.id)) {
         return send(res, 403)

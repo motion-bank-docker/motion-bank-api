@@ -68,7 +68,8 @@
       "tokenEndpoint": null,
       "clientId": null,
       "clientSecret": null,
-      "audience": null
+      "audience": null,
+      "connection": null
     }
   },
   "apiKeys": {
