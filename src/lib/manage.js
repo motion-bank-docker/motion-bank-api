@@ -57,7 +57,7 @@ class Manage extends TinyEmitter {
     }
 
     api.app.get('/manage', async (req, res) => {
-      if (!req.user || !isAdmin(req)) {
+      if (!isAdmin(req)) {
         return send(res, 403)
       }
 
@@ -82,6 +82,7 @@ class Manage extends TinyEmitter {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`GET /manage`, err.message)
+          send(res, 500)
         }
       }
     })
@@ -94,49 +95,55 @@ class Manage extends TinyEmitter {
       const headers = await getHeaders()
       try {
         const result = await axios.get(`${_config.apiEndpoint}users/${req.params.id}`, { headers })
-        send(res, 200, filterAttributes(result.data))
+        send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data))
       }
       catch (err) {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`GET /manage/${req.params.id}`, err.message)
+          send(res, 500)
         }
       }
     })
 
     api.app.post('/manage', async (req, res) => {
-      if (!req.user || !isAdmin(req)) return send(res, 403)
+      if (!isAdmin(req)) return send(res, 403)
 
       const headers = await getHeaders()
       try {
-        const result = await axios.post(`${_config.apiEndpoint}users`, req.body, { headers })
-        send(res, 200, filterAttributes(result.data, true))
+        const result = await axios.post(
+          `${_config.apiEndpoint}users`,
+          req.body,
+          { headers })
+        send(res, 200, result.data)
       }
       catch (err) {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`POST /manage/${req.params.id}`, err.message)
+          send(res, 500)
         }
       }
     })
 
     api.app.put('/manage/:id', async (req, res) => {
-      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.id)) {
+      if (!isAdmin(req)) {
         return send(res, 403)
       }
 
       const headers = await getHeaders()
       try {
-        const result = await axios.put(`${_config.apiEndpoint}users/${req.params.id}`, req.body, { headers })
-        send(res, 200, filterAttributes(result.data, true))
+        const result = await axios.put(
+          `${_config.apiEndpoint}users/${req.params.id}`, req.body, { headers })
+        send(res, 200, result.data)
       }
       catch (err) {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`PUT /manage/${req.params.id}`, err.message)
+          send(res, 500)
         }
       }
-      send(res, 404)
     })
 
     api.app.patch('/manage/:id', async (req, res) => {
@@ -146,35 +153,38 @@ class Manage extends TinyEmitter {
 
       const headers = await getHeaders()
       try {
-        const result = await axios.patch(`${_config.apiEndpoint}users/${req.params.id}`, req.body, { headers })
-        send(res, 200, filterAttributes(result.data, true))
+        const result = await axios.patch(
+          `${_config.apiEndpoint}users/${req.params.id}`,
+          isAdmin(req) ? req.body : filterAttributes(req.body, true),
+          { headers })
+        send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data, true))
       }
       catch (err) {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`PATCH /manage/${req.params.id}`, err.message)
+          send(res, 500)
         }
       }
-      send(res, 404)
     })
 
     api.app.delete('/manage/:id', async (req, res) => {
-      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.id)) {
+      if (!isAdmin(req)) {
         return send(res, 403)
       }
 
       const headers = await getHeaders()
       try {
         const result = await axios.delete(`${_config.apiEndpoint}users/${req.params.id}`, { headers })
-        send(res, 200, filterAttributes(result.data))
+        send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data))
       }
       catch (err) {
         if (err.response) send(res, err.response.status)
         else {
           console.error(`GET /manage/${req.params.id}`, err.message)
+          send(res, 500)
         }
       }
-      send(res, 404)
     })
   }
 }
