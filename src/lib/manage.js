@@ -66,12 +66,13 @@ class Manage extends TinyEmitter {
         let pagination = {}
         const filter = req.query.filter
         if (req.query.pagination) pagination = JSON.parse(req.query.pagination)
+        const q = `identities.connection:"${_config.connection}"`
         const query = {
           page: pagination.page ? pagination.page - 1 : 0,
           per_page: pagination.rowsPerPage || 10,
           include_totals: true,
           search_engine: 'v3',
-          q: filter ? `identities.connection:"${_config.connection}" AND email:${filter}*` : undefined,
+          q: q + (filter ? ` AND email:${filter}*` : ''),
           sort: `${pagination.sortBy || 'email'}:${pagination.descending ? -1 : 1}`
         }
         const result = await axios.get(`${_config.apiEndpoint}users`, { headers, params: query })
