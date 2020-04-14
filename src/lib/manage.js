@@ -141,7 +141,7 @@ class Manage extends TinyEmitter {
         send(res, 200, result.data)
       }
       catch (err) {
-        if (err.response) send(res, err.response.status)
+        if (err.response) send(res, err.response.status, err.response.data)
         else {
           console.error(`PUT /manage/${req.params.id}`, err.message)
           send(res, 500)
@@ -163,7 +163,7 @@ class Manage extends TinyEmitter {
         send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data, true))
       }
       catch (err) {
-        if (err.response) send(res, err.response.status)
+        if (err.response) send(res, err.response.status, err.response.data)
         else {
           console.error(`PATCH /manage/${req.params.id}`, err.message)
           send(res, 500)
