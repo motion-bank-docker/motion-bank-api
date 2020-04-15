@@ -58,6 +58,16 @@ const setup = async function () {
   const archives = require('./lib/archives')
   archives.setupArchives(api, maps, annotations, cells)
 
+  /**
+   * Configure groups & invitations
+   */
+
+  const Groups = require('./lib/groups'),
+    groups = new Groups(api)
+
+  const Invites = require('./lib/invites'),
+    invites = new Invites(api)
+
   await api.start()
 }
 
