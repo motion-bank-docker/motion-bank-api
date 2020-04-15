@@ -66,7 +66,7 @@ const setup = async function () {
     groups = new Groups(api)
 
   const Invites = require('./lib/invites'),
-    invites = new Invites(api)
+    invites = new Invites(api, groups)
 
   await api.start()
 }
