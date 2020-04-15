@@ -22,7 +22,7 @@ const Group = new SchemaObject({
         this.uuid = uuid.v4()
       }
       if (typeof this.id !== 'string') {
-        this.id = `${config.api.uriPrefix}invites/${this.uuid}`
+        this.id = `${config.api.uriPrefix}groups/${this.uuid}`
       }
       if (typeof this.created !== 'number') {
         this.created = Date.now()
