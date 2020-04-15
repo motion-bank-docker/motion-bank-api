@@ -2,8 +2,10 @@ const SchemaObject = require('schema-object')
 const shortid = require('shortid')
 const { Person } = require('mbjs-data-models/src/models/internal')
 const { uuid } = require('mbjs-utils')
+const config = require('config')
 
 const Invite = new SchemaObject({
+  id: { type: String },
   uuid: { type: String },
   group_id: { type: String },
   code: { type: String },
@@ -20,6 +22,9 @@ const Invite = new SchemaObject({
 
       if (typeof this.uuid !== 'string') {
         this.uuid = uuid.v4()
+      }
+      if (typeof this.id !== 'string') {
+        this.id = `${config.api.uriPrefix}invites/${this.uuid}`
       }
       if (typeof this.code !== 'string') {
         this.code = shortid.generate()
