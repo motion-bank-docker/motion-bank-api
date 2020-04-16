@@ -18,6 +18,7 @@ class Manage extends TinyEmitter {
       return {
         user_id: source.user_id,
         email: source.email,
+        password: source.password,
         nickname: source.nickname,
         name: source.name,
         user_metadata: source.user_metadata,
@@ -88,7 +89,7 @@ class Manage extends TinyEmitter {
     })
 
     api.app.get('/manage/:id', async (req, res) => {
-      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.id)) {
+      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.sub)) {
         return send(res, 403)
       }
 
@@ -150,15 +151,16 @@ class Manage extends TinyEmitter {
     })
 
     api.app.patch('/manage/:id', async (req, res) => {
-      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.id)) {
+      if (!req.user || (!isAdmin(req) && req.params.id !== req.user.sub)) {
         return send(res, 403)
       }
 
       const headers = await getHeaders()
       try {
+        const payload = isAdmin(req) ? req.body : filterAttributes(req.body, true)
         const result = await axios.patch(
           `${_config.apiEndpoint}users/${req.params.id}`,
-          isAdmin(req) ? req.body : filterAttributes(req.body, true),
+          payload,
           { headers })
         send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data, true))
       }
