@@ -1,10 +1,11 @@
 const
   config = require('config'),
-  GenericAPI = require('mbjs-generic-api')
+  GenericAPI = require('mbjs-generic-api'),
+  { version } = require('../package.json')
 
 const setup = async function () {
   const api = new GenericAPI()
-  await api.setup()
+  await api.setup(version)
 
   /**
    * Configure Profiles
