@@ -12,7 +12,7 @@ class Invites extends Service {
     api.app.get('/invites/:code/:action', async (req, res) => {
       let results
       try {
-        results = await this.client.find({ user: req.params.id })
+        results = await this.client.find({ code: req.params.code })
       }
       catch (err) {
         api.captureException(err)
@@ -36,7 +36,7 @@ class Invites extends Service {
           await this.client.remove(invite.id)
           return send(res, 200)
         }
-        else send(res, 400)
+        else return send(res, 400)
       }
       send(res, 404)
     })
