@@ -35,6 +35,23 @@ jobs:
             npm run lint
             npm run docker-release-dev
 
+  release_staging:
+    working_directory: /app
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - run: *pull-submodules
+      - setup_remote_docker
+      - run: *install-dependencies
+      - run:
+          name: Release Staging Image
+          command: |
+            set +o pipefail
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker build --no-cache -t motionbank/api:staging .
+            docker push motionbank/api:staging
+
   release_production:
     working_directory: /app
     docker:
@@ -77,6 +94,10 @@ workflows:
           filters:
             branches:
               only: master
+      - release_staging:
+          filters:
+            branches:
+              only: staging
       - release_production:
           filters:
             branches:
