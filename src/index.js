@@ -1,7 +1,7 @@
 const
   config = require('config'),
-  { version } = require('../package.json'),
-  GenericAPI = require('mbjs-generic-api')
+  GenericAPI = require('mbjs-generic-api'),
+  { version } = require('../package.json')
 
 const setup = async function () {
   const api = new GenericAPI()
