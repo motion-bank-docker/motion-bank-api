@@ -43,8 +43,9 @@ class Invites extends Service {
   }
 
   async findHandler (req, res) {
+    if (!req.query.query) return send(res, 400)
     const query = JSON.parse(req.query.query)
-    if (!Object.keys(query).length) return send(res, 400)
+    if (!query || !Object.keys(query).length) return send(res, 400)
     const results = await this._client.find(query)
     send(res, 200, { items: results })
   }
