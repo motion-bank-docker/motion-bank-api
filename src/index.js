@@ -2,7 +2,8 @@ const
   config = require('config'),
   GenericAPI = require('mbjs-generic-api'),
   { version } = require('../package.json'),
-  { parseURI } = require('mbjs-data-models/src/lib')
+  { parseURI } = require('mbjs-data-models/src/lib'),
+  getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers')
 
 const setup = async function () {
   const api = new GenericAPI()
@@ -100,6 +101,64 @@ const setup = async function () {
 
   const Manage = require('./lib/manage')
   const manage = new Manage(api)
+
+  api.addHook('acl', 'allow', async function (api, req) {
+    if (typeof req.query.resource === 'string' && req.query.resource.indexOf('/maps/') > -1) {
+      const results = await annotations.findHandler({
+        query: { query: JSON.stringify({ 'target.id': req.query.resource }) },
+        headers: req.headers
+      })
+      if (results.data && Array.isArray(results.data.items)) {
+        for (const annotation of results.data.items) {
+          if (annotation.body.type.indexOf('cell.jsonld') > -1) {
+            try {
+              await api.acl.send({
+                source: req.query.resource,
+                target: annotation.body.source.id,
+                token: getTokenFromHeaders(req.headers),
+                type: 'acl:clonePermissions'
+              })
+            }
+            catch (err) {
+              api.captureException(err)
+            }
+          }
+          else {
+            try {
+              const results = await annotations.findHandler({
+                query: { query: JSON.stringify({ 'target.id': annotation.id }) },
+                headers: req.headers
+              })
+              if (results.data && Array.isArray(results.data.items)) {
+                for (const annotation of results.data.items) {
+                  await api.acl.send({
+                    source: req.query.resource,
+                    target: annotation.id,
+                    token: getTokenFromHeaders(req.headers),
+                    type: 'acl:clonePermissions'
+                  })
+                }
+              }
+            }
+            catch (err) {
+              api.captureException(err)
+            }
+          }
+          try {
+            await api.acl.send({
+              source: req.query.resource,
+              target: annotation.id,
+              token: getTokenFromHeaders(req.headers),
+              type: 'acl:clonePermissions'
+            })
+          }
+          catch (err) {
+            api.captureException(err)
+          }
+        }
+      }
+    }
+  })
 
   /**
    * Configure sessions
