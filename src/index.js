@@ -1,7 +1,8 @@
 const
   config = require('config'),
   GenericAPI = require('mbjs-generic-api'),
-  { version } = require('../package.json')
+  { version } = require('../package.json'),
+  { parseURI } = require('mbjs-data-models/src/lib')
 
 const setup = async function () {
   const api = new GenericAPI()
@@ -25,14 +26,71 @@ const setup = async function () {
     models = require('mbjs-data-models'),
     Service = require('mbjs-generic-api/src/lib/service')
 
-  const annotations = new Service('annotations', api, models.Annotation)
-  // annotations.on('message', message => api._sockets.write(message))
-
-  const maps = new Service('maps', api, models.Map)
-  // maps.on('message', message => api._sockets.write(message))
-
   const cells = new Service('cells', api, models.Cell)
   // cells.on('message', message => api._sockets.write(message))
+
+  const annotations = new Service('annotations', api, models.Annotation, {
+    async delete (req, res, payload) {
+      if (!payload) return
+
+      if (payload.body.type.indexOf('cell.jsonld') > -1) {
+        try {
+          await cells.deleteHandler({
+            params: { uuid: parseURI(payload.body.source.id).uuid },
+            headers: req.headers
+          })
+        }
+        catch (err) {
+          api.captureException(err)
+        }
+      }
+      else {
+        try {
+          const results = await annotations.findHandler({
+            query: { query: JSON.stringify({ 'target.id': payload.id }) },
+            headers: req.headers
+          })
+          if (results.data && Array.isArray(results.data.items)) {
+            for (const annotation of results.data.items) {
+              await annotations.deleteHandler({
+                params: { uuid: parseURI(annotation.id).uuid },
+                headers: req.headers
+              })
+            }
+          }
+        }
+        catch (err) {
+          api.captureException(err)
+        }
+      }
+    }
+  })
+  // annotations.on('message', message => api._sockets.write(message))
+
+  const maps = new Service('maps', api, models.Map, {
+    async delete (req, res, payload) {
+      if (!payload) return
+
+      const results = await annotations.findHandler({
+        query: { query: JSON.stringify({ 'target.id': payload.id }) },
+        headers: req.headers
+      })
+      if (results.data && Array.isArray(results.data.items)) {
+        for (const annotation of results.data.items) {
+          try {
+            await annotations.deleteHandler({
+              params: { uuid: parseURI(annotation.id).uuid },
+              headers: req.headers
+            })
+          }
+          catch (err) {
+            api.captureException(err)
+          }
+        }
+      }
+    }
+  })
+  // maps.on('message', message => api._sockets.write(message))
 
   const documents = new Service('documents', api, models.Document)
   // documents.on('message', message => api._sockets.write(message))
