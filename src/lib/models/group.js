@@ -10,6 +10,7 @@ const Group = new SchemaObject({
   creator: {
     type: Person
   },
+  members: Array,
   created: Number,
   updated: Number
 }, {
