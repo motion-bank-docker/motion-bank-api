@@ -9,6 +9,7 @@ const Invite = new SchemaObject({
   uuid: { type: String },
   group_id: { type: String },
   code: { type: String },
+  name: { type: String },
   creator: {
     type: Person
   },
