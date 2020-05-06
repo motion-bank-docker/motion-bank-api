@@ -7,21 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes.
+
+## [2.0.0]
+
 ### Added
 
 - [ACL microservice](https://gitlab.rlp.net/motionbank/microservices/acl) integration
-- Basic [Pina Bausch Archive (PBA)](http://www.pinabausch.org) proxy endpoints for pieces and titles
+- Improved error tracking with [Sentry](https://sentry.io)
+- `/manage` service for [Auth0](https://auth0.com) user management
 
 ### Updated
 
-- Updated [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
-to 1.2.4
-- Updated [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
-to 1.1.3
+- Archive endpoint
+- [mbjs-data-models](https://gitlab.rlp.net/motionbank/mbjs/data-models)
+to 2.0.18
+- [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+to 2.2.4
+- [mbjs-archive](https://gitlab.rlp.net/motionbank/mbjs/archive)
+to 2.0.0
+- [mbjs-persistence](https://gitlab.rlp.net/motionbank/mbjs/persistence)
+to 1.1.0
+- [Polka](https://github.com/lukeed/polka)
 
 ### Changed
 
 - Uses api.uriPrefix in config (adds trailing slash over api.uriBase)
+- Rename `author` to `creator`
+- New and improved ACL system
+
+### Fixed
+
+- CI configuration
 
 
 ## [1.2.3] - 2019-03-03
@@ -83,7 +100,8 @@ branch)
 - Start proper versioning at 1.0.0
 
 
-[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.1...master
+[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/release_2_0...master
+[2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...release_2_0
 [1.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.0...v1.2.1
 [1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...v1.2.0
 [1.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.1.0
