@@ -9,7 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 No changes.
 
-## [2.0.0]
+
+## [2.1.0] - 2020-05-06
+
+### Added
+
+- `Group` model and `/groups` endpoint
+- `Invite` model and `/invites` endpoint
+
+### Updated
+
+- [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+to 2.4.1
+- [cote](https://github.com/dashersw/cote)
+to 1.0.0
+
+
+## [2.0.0] - 2020-03-31
 
 ### Added
 
@@ -100,8 +116,8 @@ branch)
 - Start proper versioning at 1.0.0
 
 
-[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/release_2_0...master
-[2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...release_2_0
+[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...release_2_1
+[2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...v2.1.0
 [1.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.0...v1.2.1
 [1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...v1.2.0
 [1.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.1.0
