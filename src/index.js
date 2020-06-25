@@ -68,6 +68,18 @@ const setup = async function () {
         }
       }
     }
+  }, {
+    properties: {
+      'target.selector._valueMillis': {
+        type: 'date'
+      },
+      _created: {
+        type: 'date'
+      },
+      _updated: {
+        type: 'date'
+      }
+    }
   })
   // annotations.on('message', message => api._sockets.write(message))
   services.push(annotations)
@@ -92,6 +104,15 @@ const setup = async function () {
             api.captureException(err)
           }
         }
+      }
+    }
+  }, {
+    properties: {
+      _created: {
+        type: 'date'
+      },
+      _updated: {
+        type: 'date'
       }
     }
   })
