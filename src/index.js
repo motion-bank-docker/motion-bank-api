@@ -6,6 +6,7 @@ const
   getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers')
 
 const setup = async function () {
+  const services = []
   const api = new GenericAPI()
   await api.setup(version)
 
@@ -16,6 +17,7 @@ const setup = async function () {
     Profiles = require('./lib/profiles'),
     profiles = new Profiles(api)
   // profiles.on('message', message => api._logger.debug(message))
+  services.push(profiles)
 
   const addCreator = require('mbjs-generic-api/src/middleware/creator')
   addCreator(api, config)
@@ -29,6 +31,7 @@ const setup = async function () {
 
   const cells = new Service('cells', api, models.Cell)
   // cells.on('message', message => api._sockets.write(message))
+  services.push(cells)
 
   const annotations = new Service('annotations', api, models.Annotation, {
     async delete (req, res, payload) {
@@ -67,6 +70,7 @@ const setup = async function () {
     }
   })
   // annotations.on('message', message => api._sockets.write(message))
+  services.push(annotations)
 
   const maps = new Service('maps', api, models.Map, {
     async delete (req, res, payload) {
@@ -92,15 +96,19 @@ const setup = async function () {
     }
   })
   // maps.on('message', message => api._sockets.write(message))
+  services.push(maps)
 
   const documents = new Service('documents', api, models.Document)
   // documents.on('message', message => api._sockets.write(message))
+  services.push(documents)
 
   const components = new Service('components', api, models.Component)
   // components.on('message', message => api._sockets.write(message))
+  services.push(components)
 
   const Manage = require('./lib/manage')
   const manage = new Manage(api)
+  services.push(manage)
 
   api.addHook('acl', 'allow', async function (api, req) {
     if (typeof req.query.resource === 'string' && req.query.resource.indexOf('/maps/') > -1) {
@@ -160,6 +168,12 @@ const setup = async function () {
     }
   })
 
+  /** Configure search */
+  const
+    Search = require('mbjs-generic-api/src/lib/search'),
+    search = new Search(api)
+  services.push(search)
+
   /**
    * Configure sessions
    */
@@ -168,6 +182,7 @@ const setup = async function () {
     Sessions = require('./lib/sessions'),
     sessions = new Sessions(api, maps, annotations)
   // sessions.on('message', message => api._logger.write(message))
+  services.push(sessions)
 
   /**
    * Configure archives
@@ -175,6 +190,7 @@ const setup = async function () {
 
   const archives = require('./lib/archives')
   archives.setupArchives(api, maps, annotations, cells)
+  services.push(archives)
 
   /**
    * Configure groups & invitations
@@ -182,9 +198,13 @@ const setup = async function () {
 
   const Groups = require('./lib/groups'),
     groups = new Groups(api)
+  services.push(groups)
 
   const Invites = require('./lib/invites'),
     invites = new Invites(api, groups)
+  services.push(invites)
+
+  process.stdout.write(`Initialised ${services.length} services\n`)
 
   await api.start()
 }
