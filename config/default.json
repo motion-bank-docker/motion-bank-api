@@ -85,5 +85,8 @@
       "key": "metadata",
       "namespace": null
     }
+  },
+  "elasticsearch": {
+    "node": null
   }
 }

@@ -74,5 +74,8 @@
       "key": "MICROSERVICES_METADATA_KEY",
       "namespace": "MICROSERVICES_METADATA_NAMESPACE"
     }
+  },
+  "elasticsearch": {
+    "node": "ELASTICSEARCH_NODE"
   }
 }
