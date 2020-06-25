@@ -168,6 +168,12 @@ const setup = async function () {
     }
   })
 
+  /** Configure search */
+  const
+    Search = require('mbjs-generic-api/src/lib/search'),
+    search = new Search(api)
+  services.push(search)
+
   /**
    * Configure sessions
    */
