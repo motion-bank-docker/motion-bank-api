@@ -1,6 +1,6 @@
 # Changelog
 
-This document tracks all important changes to the Motion Bank Transcoding Service.
+This document tracks all important changes to the Motion Bank API.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [Elasticsearch](https://www.elastic.co) endpoint at `/search`
+- [Elasticsearch](https://www.elastic.co) endpoint at `/search` (supports query & aggregations)
 - Automatic indexing of objects for `POST`, `PATCH`, `PUT` and removal on `DELETE`
 
 ### Updated
 
 - [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
-to 2.6.0
+to 2.6.1
 
 
 ## [2.1.0] - 2020-05-06

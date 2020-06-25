@@ -3,7 +3,8 @@ const
   GenericAPI = require('mbjs-generic-api'),
   { version } = require('../package.json'),
   { parseURI } = require('mbjs-data-models/src/lib'),
-  getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers')
+  getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers'),
+  searchIndexMappings = require('./search-index-mappings')
 
 const setup = async function () {
   const services = []
@@ -68,19 +69,7 @@ const setup = async function () {
         }
       }
     }
-  }, {
-    properties: {
-      'target.selector._valueMillis': {
-        type: 'date'
-      },
-      _created: {
-        type: 'date'
-      },
-      _updated: {
-        type: 'date'
-      }
-    }
-  })
+  }, searchIndexMappings.annotations)
   // annotations.on('message', message => api._sockets.write(message))
   services.push(annotations)
 
@@ -106,16 +95,7 @@ const setup = async function () {
         }
       }
     }
-  }, {
-    properties: {
-      _created: {
-        type: 'date'
-      },
-      _updated: {
-        type: 'date'
-      }
-    }
-  })
+  }, searchIndexMappings.maps)
   // maps.on('message', message => api._sockets.write(message))
   services.push(maps)
 
