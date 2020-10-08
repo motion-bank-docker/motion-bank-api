@@ -18,6 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 to 2.6.2
 
 
+## [2.2.0] - 2020-10-08
+
+### Added
+
+- Assets service (active when Minio is configured)
+
+### Updated
+
+- - [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+  to 2.6.4
+
+
 ## [2.1.0] - 2020-05-06
 
 ### Added
@@ -124,9 +136,12 @@ branch)
 - Start proper versioning at 1.0.0
 
 
-[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...release_2_1
-[2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...v2.1.0
-[1.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.0...v1.2.1
+[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...release_2_2
+[2.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...v2.2.0
+[2.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...v2.1.0
+[2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.3...v2.0.0
+[1.2.3]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.2...v1.2.3
+[1.2.2]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.0...v1.2.2
 [1.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.1.0...v1.2.0
 [1.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.0.0...v1.1.0
 [1.0.0]: https://gitlab.rlp.net/motionbank/api/compare/initial...v1.0.0
