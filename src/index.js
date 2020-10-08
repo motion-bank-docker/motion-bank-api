@@ -98,9 +98,15 @@ const setup = async function () {
   // maps.on('message', message => api._sockets.write(message))
   services.push(maps)
 
-  const documents = new Service('documents', api, models.Document)
-  // documents.on('message', message => api._sockets.write(message))
-  services.push(documents)
+  /**
+   * Configure Assets
+   */
+  if (config.assets && config.assets.host) {
+    const
+      Assets = require('./lib/assets'),
+      assets = new Assets(api, config)
+    services.push(assets)
+  }
 
   const components = new Service('components', api, models.Component)
   // components.on('message', message => api._sockets.write(message))
