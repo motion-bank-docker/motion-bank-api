@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-No changes.
+### Updated
+
+- [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+to 2.6.5
 
 
 ## [2.2.0] - 2020-10-08
@@ -18,8 +21,8 @@ No changes.
 
 ### Updated
 
-- - [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
-  to 2.6.4
+- [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+to 2.6.4
 
 
 ## [2.1.0] - 2020-05-06
