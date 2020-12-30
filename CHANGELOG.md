@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes.
+
+
+## [2.2.1] - 2020-12-30
+
 ### Updated
 
 - [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
-to 2.6.5
+to 2.7.0
+- MongoDB client to ^3.6.3
 
 
 ## [2.2.0] - 2020-10-08
@@ -132,6 +138,7 @@ branch)
 
 
 [Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...release_2_2
+[2.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...v2.2.1
 [2.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...v2.2.0
 [2.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...v2.1.0
 [2.0.0]: https://gitlab.rlp.net/motionbank/api/compare/v1.2.3...v2.0.0
