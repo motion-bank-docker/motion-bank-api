@@ -17,6 +17,11 @@ No changes.
 - Broken range requests for streaming media assets
 - Broken ACL check for assets
 
+### Updated
+
+- [mbjs-generic-api](https://gitlab.rlp.net/motionbank/mbjs/generic-api)
+  to 2.8.0
+
 
 ## [2.2.1] - 2020-12-30
 
