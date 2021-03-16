@@ -55,9 +55,14 @@ class Assets extends Service {
           stream = this.minio.listObjects(req.params.bucket, object)
 
         let entries = []
-        stream.on('error', err => {
+        stream.on('error', async err => {
+          /** If the bucket does not exist, create it */
+          if (err.code === 'NoSuchBucket') {
+            await this.minio.makeBucket(req.params.bucket)
+            return _this._response(req, res, [])
+          }
           /** If list not found, return 404 */
-          if (err.code === 'NotFound' || err.code === 'NoSuchBucket') _this._errorResponse(res, 404)
+          if (err.code === 'NotFound') return _this._errorResponse(res, 404)
           else _this.captureException(err)
         })
         stream.on('data', data => {
@@ -74,14 +79,13 @@ class Assets extends Service {
             catch (e) { /* ignore error */ }
           }
           /** Return directory listing */
-          _this._response(req, res, entries)
+          return _this._response(req, res, entries)
         })
       }
     }
 
     /** If metdata is found, set content-type and return object */
     if (metadata) {
-      // FIXME: Ranges are broken when using @polka/send-type@0.5.2
       if (hasRange) {
         let { size } = metadata
         let [start, end] = range.replace(/bytes=/, '').split('-')
@@ -96,14 +100,16 @@ class Assets extends Service {
           return this._errorResponse(res, 416)
         }
 
-        res.setHeader('Accept-Ranges', 'bytes')
-        res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
-        res.setHeader('Content-Length', end - start + 1)
-        res.setHeader('Last-Modified', metadata.lastModified)
-        res.setHeader('Content-Type', metadata.metaData ? metadata.metaData['content-type'] : 'application/octet-stream')
+        res.writeHead(206, {
+          'Accept-Ranges': 'bytes',
+          'Content-Range': `bytes ${start}-${end}/${size}`,
+          'Content-Length': end - start + 1,
+          'Last-Modified': metadata.lastModified,
+          'Content-Type': metadata.metaData ? metadata.metaData['content-type'] : 'application/octet-stream'
+        })
 
         const stream = await this.minio.getPartialObject(req.params.bucket, object, start, end - start + 1)
-        return this._response(req, res, stream, 206)
+        return stream.pipe(res)
       }
 
       if (req.query.dl) res.setHeader('Content-Type', 'application/force-download')
@@ -114,7 +120,7 @@ class Assets extends Service {
       }
 
       const stream = await this.minio.getObject(req.params.bucket, object)
-      this._response(req, res, stream)
+      return stream.pipe(res)
     }
   }
 
