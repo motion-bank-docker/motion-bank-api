@@ -15,6 +15,7 @@ No changes.
 ### Fixed
 
 - Broken range requests for streaming media assets
+- Broken ACL check for assets
 
 
 ## [2.2.1] - 2020-12-30

@@ -1,5 +1,6 @@
 const
   getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers'),
+  getTokenFromQuery = require('mbjs-generic-api/src/util/get-token-from-query'),
   Service = require('mbjs-generic-api/src/lib/service')
 
 class Assets extends Service {
@@ -33,7 +34,8 @@ class Assets extends Service {
     let allowed = req.user && req.params.bucket === `user-${req.user.uuid}`
     if (!allowed) {
       try {
-        allowed = await this.isAllowed(req, { id: req.path }, ['get'])
+        const id = req.path.substr('/assets/'.length)
+        allowed = await this.isAllowed(req, { id }, ['get', 'view'])
       }
       catch (err) {
         this.captureException(err)
@@ -175,7 +177,7 @@ class Assets extends Service {
         roles: [req.user.id],
         resources: [`${req.params.bucket}/${filename}`],
         permissions: ['get', 'put', 'delete'],
-        token: getTokenFromHeaders(req.headers),
+        token: getTokenFromHeaders(req.headers) || getTokenFromQuery(req.query),
         type: 'acl:allow'
       }
       await this.acl.send(payload)
@@ -198,7 +200,7 @@ class Assets extends Service {
     await this.minio.removeObject(req.params.bucket, object)
     await this.acl.send({
       resources: [`${req.params.bucket}/${object}`],
-      token: getTokenFromHeaders(req.headers),
+      token: getTokenFromHeaders(req.headers) || getTokenFromQuery(req.query),
       type: 'acl:clear'
     })
 
