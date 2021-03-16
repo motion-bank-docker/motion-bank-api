@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 No changes.
 
 
+## [2.2.2] - 2021-03-16
+
+### Fixed
+
+- Broken range requests for streaming media assets
+
+
 ## [2.2.1] - 2020-12-30
 
 ### Updated
@@ -137,7 +144,8 @@ branch)
 - Start proper versioning at 1.0.0
 
 
-[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...release_2_2
+[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.2...release_2_2
+[2.2.2]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.1...v2.2.2
 [2.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...v2.2.1
 [2.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...v2.2.0
 [2.1.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.0.0...v2.1.0
