@@ -28,7 +28,7 @@ class Assets extends Service {
     /** Extract object path */
     const
       parts = req.path.split('/'),
-      object = parts.length >= 4 ? parts.splice(3).join('/') : undefined
+      object = parts.length >= 4 ? decodeURIComponent(parts.splice(3).join('/')) : undefined
 
     /** Check access permissions */
     let allowed = req.user && req.params.bucket === `user-${req.user.uuid}`
@@ -183,7 +183,7 @@ class Assets extends Service {
       await this.acl.send(payload)
 
       /** Return file info */
-      this._response(req, res, {
+      return this._response(req, res, {
         file: `${req.params.bucket}/${filename}`,
         originalName: req.file.originalname
       })
@@ -194,7 +194,7 @@ class Assets extends Service {
     /** Only allow if user bucket and owner */
     if (req.params.bucket !== `user-${req.user.uuid}`) return this._errorResponse(res, 403)
 
-    const object = req.path.split('/').splice(3).join('/')
+    const object = decodeURIComponent(req.path.split('/').splice(3).join('/'))
 
     /** Remove object */
     await this.minio.removeObject(req.params.bucket, object)
@@ -204,7 +204,7 @@ class Assets extends Service {
       type: 'acl:clear'
     })
 
-    this._response(req, res)
+    return this._response(req, res)
   }
 }
 
