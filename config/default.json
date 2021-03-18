@@ -19,7 +19,8 @@
       "accessKey": null,
       "secretKey": null
     },
-    "archivesBucket": "piecemaker-archives"
+    "archivesBucket": "piecemaker-archives",
+    "typesWhitelist": null
   },
   "resources": {
     "mongodb": {

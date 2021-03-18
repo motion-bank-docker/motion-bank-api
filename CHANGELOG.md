@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ASSETS_TYPES_WHITELIST` env variable to only allow certain
+  asset extensions to be accepted (e.g. `jpg,gif,mp4`).
+
 ### Fixed
 
-- Broken handling of non-ASCII asset paths
+- Uploaded asset paths break for certain characters
 
 
 ## [2.2.2] - 2021-03-16

@@ -19,7 +19,8 @@
       "accessKey": "ASSETS_ACCESS_KEY",
       "secretKey": "ASSETS_SECRET_KEY"
     },
-    "archivesBucket": "ASSETS_ARCHIVES_BUCKET"
+    "archivesBucket": "ASSETS_ARCHIVES_BUCKET",
+    "typesWhitelist": "ASSETS_TYPES_WHITELIST"
   },
   "resources": {
     "mongodb": {

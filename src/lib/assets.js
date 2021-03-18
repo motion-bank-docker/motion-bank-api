@@ -1,4 +1,5 @@
 const
+  sanitizeFilename = require('sanitize-filename'),
   getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers'),
   getTokenFromQuery = require('mbjs-generic-api/src/util/get-token-from-query'),
   Service = require('mbjs-generic-api/src/lib/service')
@@ -131,7 +132,6 @@ class Assets extends Service {
       _this = this,
       os = require('os'),
       path = require('path'),
-      { ObjectUtil } = require('mbjs-utils'),
       multer = require('multer'),
       upload = multer({ dest: os.tmpdir() })
 
@@ -140,6 +140,28 @@ class Assets extends Service {
     upload.single('file')(req, res, async () => {
       /** Only allow if user bucket and owner */
       if (req.params.bucket !== `user-${req.user.uuid}`) return this._errorResponse(res, 403)
+
+      /** Validation */
+      const
+        extname = path.extname(req.file.originalname),
+        sanitized = sanitizeFilename(path.basename(req.file.originalname, extname))
+
+      if (this.config.assets.typesWhitelist) {
+        const typesWhitelist = this.config.assets.typesWhitelist.split(',')
+        if (!typesWhitelist.includes(extname.toLowerCase().substr(1))) {
+          return _this._errorResponse(res, 400)
+        }
+      }
+
+      /** Sanitize input */
+      let filename = `${sanitized}${extname.toLowerCase()}`
+      if (req.body.basePath) {
+        const basePath = req.body.basePath.split('/')
+          .map(dir => sanitizeFilename(dir))
+          .filter(dir => dir && !!dir.length)
+          .join('/')
+        filename = path.join(basePath, filename)
+      }
 
       /** Check if bucket exists */
       const exists = await _this.minio.bucketExists(req.params.bucket)
@@ -153,18 +175,6 @@ class Assets extends Service {
           _this._captureException(err)
           return _this._errorResponse(res, 500)
         }
-      }
-
-      const
-        extname = path.extname(req.file.originalname),
-        slug = ObjectUtil.slug(path.basename(req.file.originalname, extname))
-
-      let filename = `${slug}${extname.toLowerCase()}`
-      if (req.body.basePath) {
-        const basePath = req.body.basePath.split('/')
-          .map(dir => ObjectUtil.slug(dir))
-          .join('/')
-        filename = path.join(basePath, filename)
       }
 
       /** Put object */
