@@ -161,7 +161,10 @@ class Assets extends Service {
 
       let filename = `${slug}${extname.toLowerCase()}`
       if (req.body.basePath) {
-        filename = path.join(req.body.basePath, filename)
+        const basePath = req.body.basePath.split('/')
+          .map(dir => ObjectUtil.slug(dir))
+          .join('/')
+        filename = path.join(basePath, filename)
       }
 
       /** Put object */
