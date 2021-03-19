@@ -3,16 +3,14 @@ const
   send = require('@polka/send-type'),
   TinyEmitter = require('tiny-emitter'),
   axios = require('axios'),
-  { ObjectUtil } = require('mbjs-utils')
+  getHeaders = require('./util/get-headers')
 
 class Manage extends TinyEmitter {
   constructor (api) {
     super()
 
-    const _config = config.auth.admin
-    this._config = _config
-
-    let credentials
+    const _this = this
+    this.config = config.auth.admin
 
     const filterAttributes = (source, isUpdate = false) => {
       return {
@@ -26,48 +24,19 @@ class Manage extends TinyEmitter {
       }
     }
 
-    const getCredentials = async function () {
-      const result = await axios.post(
-        _config.tokenEndpoint,
-        {
-          client_id: _config.clientId,
-          client_secret: _config.clientSecret,
-          audience: _config.audience,
-          grant_type: 'client_credentials'
-        },
-        {
-          headers: { 'content-type': 'application/json' }
-        }
-      )
-      return ObjectUtil.merge({
-        expires_at: Date.now() + result.data.expires_in * 1000
-      }, result.data)
-    }
-
-    const getHeaders = async function () {
-      if (!credentials || credentials.expires_at < Date.now()) {
-        credentials = await getCredentials()
-      }
-      return {
-        Authorization: `${credentials.token_type} ${credentials.access_token}`
-      }
-    }
-
     const isAdmin = req => {
       return Array.isArray(req.user.profile.roles) && req.user.profile.roles.indexOf('admin') > -1
     }
 
     api.app.get('/manage', async (req, res) => {
-      if (!isAdmin(req)) {
-        return send(res, 403)
-      }
+      if (!isAdmin(req)) return send(res, 403)
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
         let pagination = {}
         const filter = req.query.filter
         if (req.query.pagination) pagination = JSON.parse(req.query.pagination)
-        const q = `identities.connection:"${_config.connection}"`
+        const q = `identities.connection:"${_this.config.connection}"`
         const query = {
           page: pagination.page ? pagination.page - 1 : 0,
           per_page: pagination.rowsPerPage || 10,
@@ -76,7 +45,7 @@ class Manage extends TinyEmitter {
           q: q + (filter ? ` AND email:${filter}*` : ''),
           sort: `${pagination.sortBy || 'email'}:${pagination.descending ? -1 : 1}`
         }
-        const result = await axios.get(`${_config.apiEndpoint}users`, { headers, params: query })
+        const result = await axios.get(`${_this.config.apiEndpoint}users`, { headers, params: query })
         send(res, 200, result.data)
       }
       catch (err) {
@@ -93,9 +62,9 @@ class Manage extends TinyEmitter {
         return send(res, 403)
       }
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
-        const result = await axios.get(`${_config.apiEndpoint}users/${req.params.id}`, { headers })
+        const result = await axios.get(`${_this.config.apiEndpoint}users/${req.params.id}`, { headers })
         send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data))
       }
       catch (err) {
@@ -111,12 +80,12 @@ class Manage extends TinyEmitter {
       if (!isAdmin(req)) return send(res, 403)
 
       req.body.creator = undefined
-      req.body.connection = _config.connection
+      req.body.connection = _this.config.connection
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
         const result = await axios.post(
-          `${_config.apiEndpoint}users`,
+          `${_this.config.apiEndpoint}users`,
           req.body,
           { headers })
         send(res, 200, result.data)
@@ -135,10 +104,10 @@ class Manage extends TinyEmitter {
         return send(res, 403)
       }
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
         const result = await axios.put(
-          `${_config.apiEndpoint}users/${req.params.id}`, req.body, { headers })
+          `${_this.config.apiEndpoint}users/${req.params.id}`, req.body, { headers })
         send(res, 200, result.data)
       }
       catch (err) {
@@ -155,11 +124,11 @@ class Manage extends TinyEmitter {
         return send(res, 403)
       }
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
         const payload = isAdmin(req) ? req.body : filterAttributes(req.body, true)
         const result = await axios.patch(
-          `${_config.apiEndpoint}users/${req.params.id}`,
+          `${_this.config.apiEndpoint}users/${req.params.id}`,
           payload,
           { headers })
         send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data, true))
@@ -178,9 +147,9 @@ class Manage extends TinyEmitter {
         return send(res, 403)
       }
 
-      const headers = await getHeaders()
+      const headers = await getHeaders(_this)
       try {
-        const result = await axios.delete(`${_config.apiEndpoint}users/${req.params.id}`, { headers })
+        const result = await axios.delete(`${_this.config.apiEndpoint}users/${req.params.id}`, { headers })
         send(res, 200, isAdmin(req) ? result.data : filterAttributes(result.data))
       }
       catch (err) {
