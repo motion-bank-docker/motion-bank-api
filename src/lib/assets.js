@@ -70,7 +70,7 @@ class Assets extends Service {
           /** If the bucket does not exist, create it */
           if (err.code === 'NoSuchBucket') {
             try {
-              await this.minio.makeBucket(req.params.bucket)
+              await _this.minio.makeBucket(req.params.bucket)
               debug('getHandler: created new bucket', req.params.bucket)
               return _this._response(req, res, [])
             }
@@ -96,13 +96,15 @@ class Assets extends Service {
           /** Get metadata for entries */
           for (let entry of entries) {
             entry.metaData = {}
-            try {
-              const stat = await this.minio.statObject(req.params.bucket, entry.name)
-              entry.metaData = stat.metaData
-              debug('getHandler: listObjects statObject size:', stat.size)
-            }
-            catch (err) {
-              debug('getHandler: listObjects statObject error:', err.message)
+            if (typeof entry.name === 'string') {
+              try {
+                const stat = await _this.minio.statObject(req.params.bucket, entry.name)
+                entry.metaData = stat.metaData
+                debug('getHandler: listObjects statObject size:', stat.size)
+              }
+              catch (err) {
+                debug('getHandler: listObjects statObject error:', err.message)
+              }
             }
           }
           debug('getHandler: listObjects entries:', entries.length)
