@@ -75,8 +75,9 @@ class Assets extends Service {
               return _this._response(req, res, [])
             }
             catch (err) {
-              debug('getHandler: failed to create bucket', err.message())
-              return _this._captureException(err)
+              debug('getHandler: failed to create bucket', err.message)
+              _this._captureException(err)
+              return _this._errorResponse(res, 500, err.message)
             }
           }
           /** If list not found, return 404 */
