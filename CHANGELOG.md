@@ -20,6 +20,7 @@ No changes.
 
 ### Fixed
 
+- Broken reference to `_captureException()` in `Assets` service
 - Uploaded asset paths break for certain characters
 
 

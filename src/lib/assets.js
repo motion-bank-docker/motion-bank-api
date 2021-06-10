@@ -46,7 +46,7 @@ class Assets extends Service {
       }
       catch (err) {
         debug('getHandler: ACL error', err.message)
-        this.captureException(err)
+        this._captureException(err)
       }
     }
     if (!allowed) return this._errorResponse(res, 403)
@@ -76,12 +76,12 @@ class Assets extends Service {
             }
             catch (err) {
               debug('getHandler: failed to create bucket', err.message())
-              return _this.captureException(err)
+              return _this._captureException(err)
             }
           }
           /** If list not found, return 404 */
           if (err.code === 'NotFound') return _this._errorResponse(res, 404)
-          else _this.captureException(err)
+          else _this._captureException(err)
         })
         stream.on('data', data => {
           debug('getHandler: listObjects data', data.name || data.prefix)
