@@ -82,7 +82,11 @@ class Assets extends Service {
           }
           /** If list not found, return 404 */
           if (err.code === 'NotFound') return _this._errorResponse(res, 404)
-          else _this._captureException(err)
+          else {
+            debug('getHandler: listObjects error', err.message)
+            _this._captureException(err)
+            return _this._errorResponse(res, 500, err.message)
+          }
         })
         stream.on('data', data => {
           debug('getHandler: listObjects data', data.name || data.prefix)
