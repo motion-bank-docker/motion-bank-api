@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+No changes.
+
+
+## [2.2.3] - 2021-06-10
+
 ### Added
 
 - Debug logging in ? `Assets` service
@@ -158,7 +163,8 @@ branch)
 - Start proper versioning at 1.0.0
 
 
-[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.2...release_2_2
+[Unreleased]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.3...release_2_2
+[2.2.3]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.2...v2.2.3
 [2.2.2]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.1...v2.2.2
 [2.2.1]: https://gitlab.rlp.net/motionbank/api/compare/v2.2.0...v2.2.1
 [2.2.0]: https://gitlab.rlp.net/motionbank/api/compare/v2.1.0...v2.2.0
