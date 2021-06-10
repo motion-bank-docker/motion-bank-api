@@ -1,4 +1,5 @@
 const
+  debug = require('debug')('assets'),
   sanitizeFilename = require('sanitize-filename'),
   getTokenFromHeaders = require('mbjs-generic-api/src/util/get-token-from-headers'),
   getTokenFromQuery = require('mbjs-generic-api/src/util/get-token-from-query'),
@@ -18,6 +19,7 @@ class Assets extends Service {
 
     _this.config = config
     _this.minio = new Minio.Client(opts)
+    debug('Minio client initialised')
 
     api.app.post('/assets/:bucket', (req, res) => _this.postHandler(req, res))
     api.app.get('/assets/:bucket/*', (req, res) => _this.getHandler(req, res))
@@ -30,6 +32,9 @@ class Assets extends Service {
     const
       parts = req.path.split('/'),
       object = parts.length >= 4 ? decodeURIComponent(parts.splice(3).join('/')) : undefined
+    debug('getHandler: object path', object)
+    debug('getHandler: req.params.bucket', req.params.bucket)
+    debug('getHandler: user', req.user.uuid)
 
     /** Check access permissions */
     let allowed = req.user && req.params.bucket === `user-${req.user.uuid}`
@@ -37,8 +42,10 @@ class Assets extends Service {
       try {
         const id = req.path.substr('/assets/'.length)
         allowed = await this.isAllowed(req, { id }, ['get', 'view'])
+        debug('getHandler: ACL allowed', allowed)
       }
       catch (err) {
+        debug('getHandler: ACL error', err.message)
         this.captureException(err)
       }
     }
@@ -49,6 +56,7 @@ class Assets extends Service {
     let metadata, hasRange = !!range
     try {
       metadata = await this.minio.statObject(req.params.bucket, object)
+      debug('getHandler: metadata', metadata)
     }
     catch (err) {
       /** If object not found, assume it is a directory */
@@ -61,14 +69,22 @@ class Assets extends Service {
         stream.on('error', async err => {
           /** If the bucket does not exist, create it */
           if (err.code === 'NoSuchBucket') {
-            await this.minio.makeBucket(req.params.bucket)
-            return _this._response(req, res, [])
+            try {
+              await this.minio.makeBucket(req.params.bucket)
+              debug('getHandler: created new bucket', req.params.bucket)
+              return _this._response(req, res, [])
+            }
+            catch (err) {
+              debug('getHandler: failed to create bucket', err.message())
+              return _this.captureException(err)
+            }
           }
           /** If list not found, return 404 */
           if (err.code === 'NotFound') return _this._errorResponse(res, 404)
           else _this.captureException(err)
         })
         stream.on('data', data => {
+          debug('getHandler: listObjects data', data.name || data.prefix)
           entries.push(data)
         })
         stream.on('end', async () => {
@@ -78,12 +94,20 @@ class Assets extends Service {
             try {
               const stat = await this.minio.statObject(req.params.bucket, entry.name)
               entry.metaData = stat.metaData
+              debug('getHandler: listObjects statObject size:', stat.size)
             }
-            catch (e) { /* ignore error */ }
+            catch (err) {
+              debug('getHandler: listObjects statObject error:', err.message)
+            }
           }
+          debug('getHandler: listObjects entries:', entries.length)
           /** Return directory listing */
           return _this._response(req, res, entries)
         })
+      }
+      else {
+        debug('getHandler: metadata error', err)
+        return this._errorResponse(res, err.code || 500, err.message)
       }
     }
 
@@ -100,6 +124,7 @@ class Assets extends Service {
 
         if (start >= size || end >= size || start >= end) {
           res.setHeader('Content-Range', `bytes */${size}`)
+          debug('getHandler: Content-Range error')
           return this._errorResponse(res, 416)
         }
 
@@ -110,8 +135,10 @@ class Assets extends Service {
           'Last-Modified': metadata.lastModified,
           'Content-Type': metadata.metaData ? metadata.metaData['content-type'] : 'application/octet-stream'
         })
+        debug('getHandler: wrote head 206')
 
         const stream = await this.minio.getPartialObject(req.params.bucket, object, start, end - start + 1)
+        debug('getHandler: getPartialObject stream:', typeof stream)
         return stream.pipe(res)
       }
 
@@ -120,9 +147,11 @@ class Assets extends Service {
         res.setHeader('Content-Length', metadata.size)
         res.setHeader('Last-Modified', metadata.lastModified)
         res.setHeader('Content-Type', metadata.metaData ? metadata.metaData['content-type'] : 'application/octet-stream')
+        debug('getHandler: set head 200')
       }
 
       const stream = await this.minio.getObject(req.params.bucket, object)
+      debug('getHandler: getObject stream:', typeof stream)
       return stream.pipe(res)
     }
   }
