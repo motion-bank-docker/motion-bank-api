@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Debug logging in ? `Assets` service
 - `ASSETS_TYPES_WHITELIST` env variable to only allow certain
   asset extensions to be accepted (e.g. `jpg,gif,mp4`).
 
