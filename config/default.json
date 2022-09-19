@@ -19,7 +19,6 @@
       "accessKey": null,
       "secretKey": null
     },
-    "externalUrl": null,
     "archivesBucket": "piecemaker-archives",
     "typesWhitelist": null
   },

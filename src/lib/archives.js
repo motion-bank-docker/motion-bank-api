@@ -89,15 +89,6 @@ module.exports.setupArchives = (api, mapService, annotationService, cellService)
     await fs.unlink(archivePath)
     const url = await minioClient.presignedGetObject(config.assets.archivesBucket, path.basename(archivePath))
 
-    if (config.get('externalUrl')) {
-      const parsedUrl = new URL(url)
-      const parsedExternal = new URL(config.get('externalUrl'))
-      parsedUrl.host = parsedExternal.host
-      parsedUrl.port = parsedExternal.port
-      parsedUrl.protocol = parsedExternal.protocol
-      return send(res, 200, parsedUrl.href)
-    }
-
     send(res, 200, url)
   })
   api.app.post('/archives/maps', async function (req, res) {
