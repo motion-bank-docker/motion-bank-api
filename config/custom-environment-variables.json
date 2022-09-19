@@ -19,6 +19,7 @@
       "accessKey": "ASSETS_ACCESS_KEY",
       "secretKey": "ASSETS_SECRET_KEY"
     },
+    "externalUrl": "ASSETS_EXTERNAL_URL",
     "archivesBucket": "ASSETS_ARCHIVES_BUCKET",
     "typesWhitelist": "ASSETS_TYPES_WHITELIST"
   },
