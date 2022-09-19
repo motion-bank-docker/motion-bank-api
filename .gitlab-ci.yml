@@ -1,25 +1,11 @@
-image: node:latest
-
-stages:
-  - build
-  - test
-
-cache:
-  paths:
-    - node_modules/
-
-install_dependencies:
-  stage: build
+deploy-release:
+  only:
+    - /^release_.*$/
+  stage: deploy
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
   script:
-    - npm install
-  artifacts:
-    paths:
-      - node_modules/
-
-run_tests:
-  stage: test
-  script: npm test
-
-run_linter:
-  stage: test
-  script: npm run lint
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$DOCKER_HUB_AUTH\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination motionbank/api:$CI_COMMIT_BRANCH
