@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:10
 MAINTAINER Motion Bank
 
 COPY .docker-lib/scripts/entrypoint.sh /usr/local/bin/
